@@ -1,0 +1,20 @@
+---
+Name: ss-site-logging
+---
+SilverStripe\Core\Injector\Injector:
+  Monolog:
+    class: Monolog\Logger
+    constructor:
+      0: App
+      1:
+        - "%$StreamHandler"
+  StreamHandler:
+    class: Monolog\Handler\StreamHandler
+    constructor:
+      0: "../../error.log"
+  LoggerBridge:
+    class: Camspiers\LoggerBridge\LoggerBridge
+    constructor:
+      0: "%$Monolog"
+    properties:
+      ErrorReporter: '%$LoggerBridgeDebugErrorReporter'
