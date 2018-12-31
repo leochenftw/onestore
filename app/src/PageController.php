@@ -78,39 +78,39 @@ namespace {
         {
             $site_config    =   SiteConfig::current_site_config();
             if (!empty($this->OGType) || !empty($site_config->OGType)) {
-                $data       =   [
-                                    'OGType'                =>  !empty($this->OGType) ?
-                                                                $this->OGType :
-                                                                $site_config->OGType,
-                                    'AbsoluteLink'          =>  $this->AbsoluteLink(),
-                                    'OGTitle'               =>  !empty($this->OGTitle) ?
-                                                                $this->OGTitle :
-                                                                $this->Title,
-                                    'OGDescription'         =>  !empty($this->OGDescription) ?
-                                                                $this->OGDescription :
-                                                                $site_config->OGDescription,
-                                    'OGImage'               =>  !empty($this->OGImage()->exists()) ?
-                                                                $this->OGImage() :
-                                                                $site_config->OGImage(),
-                                    'OGImageLarge'          =>  !empty($this->OGImageLarge()->exists()) ?
-                                                                $this->OGImageLarge() :
-                                                                $site_config->OGImageLarge(),
-                                    'TwitterCard'           =>  !empty($this->TwitterCard) ?
-                                                                $this->TwitterCard :
-                                                                $site_config->TwitterCard,
-                                    'TwitterTitle'          =>  !empty($this->TwitterTitle) ?
-                                                                $this->TwitterTitle :
-                                                                $this->Title,
-                                    'TwitterDescription'    =>  !empty($this->TwitterDescription) ?
-                                                                $this->TwitterDescription :
-                                                                $site_config->TwitterDescription,
-                                    'TwitterImageLarge'     =>  !empty($this->TwitterImageLarge()->exists()) ?
-                                                                $this->TwitterImageLarge() :
-                                                                $site_config->TwitterImageLarge(),
-                                    'TwitterImage'          =>  !empty($this->TwitterImage()->exists()) ?
-                                                                $this->TwitterImage() :
-                                                                $site_config->TwitterImage(),
-                                ];
+                $data   =   [
+                    'OGType'                =>  !empty($this->OGType) ?
+                                                $this->OGType :
+                                                $site_config->OGType,
+                    'AbsoluteLink'          =>  $this->AbsoluteLink(),
+                    'OGTitle'               =>  !empty($this->OGTitle) ?
+                                                $this->OGTitle :
+                                                $this->Title,
+                    'OGDescription'         =>  !empty($this->OGDescription) ?
+                                                $this->OGDescription :
+                                                $site_config->OGDescription,
+                    'OGImage'               =>  !empty($this->OGImage()->exists()) ?
+                                                $this->OGImage() :
+                                                $site_config->OGImage(),
+                    'OGImageLarge'          =>  !empty($this->OGImageLarge()->exists()) ?
+                                                $this->OGImageLarge() :
+                                                $site_config->OGImageLarge(),
+                    'TwitterCard'           =>  !empty($this->TwitterCard) ?
+                                                $this->TwitterCard :
+                                                $site_config->TwitterCard,
+                    'TwitterTitle'          =>  !empty($this->TwitterTitle) ?
+                                                $this->TwitterTitle :
+                                                $this->Title,
+                    'TwitterDescription'    =>  !empty($this->TwitterDescription) ?
+                                                $this->TwitterDescription :
+                                                $site_config->TwitterDescription,
+                    'TwitterImageLarge'     =>  !empty($this->TwitterImageLarge()->exists()) ?
+                                                $this->TwitterImageLarge() :
+                                                $site_config->TwitterImageLarge(),
+                    'TwitterImage'          =>  !empty($this->TwitterImage()->exists()) ?
+                                                $this->TwitterImage() :
+                                                $site_config->TwitterImage(),
+                ];
 
                 return ArrayData::create($data);
             }

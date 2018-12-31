@@ -25,16 +25,18 @@ class CanCRUD implements PermissionProvider
         $permission_codes = Config::inst()->get($className, 'PermissionCode');
         $classes = Config::inst()->get($className, 'Permissions');
 
-        foreach ($classes as $className) {
-            $shortName = ClassInfo::shortName($className);
-            $singleton = $className::singleton()->singular_name();
-            $config = Config::inst()->get($className, 'Permission');
+        if (!empty($classes)) {
+            foreach ($classes as $className) {
+                $shortName = ClassInfo::shortName($className);
+                $singleton = $className::singleton()->singular_name();
+                $config = Config::inst()->get($className, 'Permission');
 
-            foreach ($permission_codes as $code) {
-                $permissions[strtoupper($code) . '_' . strtoupper($shortName)] = [
-                    'name' => $code . ' a ' . $singleton,
-                    'category' => $config['Category']
-                ];
+                foreach ($permission_codes as $code) {
+                    $permissions[strtoupper($code) . '_' . strtoupper($shortName)] = [
+                        'name' => $code . ' a ' . $singleton,
+                        'category' => $config['Category']
+                    ];
+                }
             }
         }
 

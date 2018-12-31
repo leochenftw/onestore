@@ -1,0 +1,36 @@
+---
+Name: 'e-collector-overrides'
+After: 'e-collector'
+---
+# Member:
+#   extensions:
+#     - StoredCreditcardExtension
+Leochenftw\eCommerce\eCollector:
+  MerchantSettings:
+    MerchantHomepageURL: "http://onestore.leochen.co.nz/"
+  GatewaySettings:
+    DPS:
+      ID: NursingCouncilofNZ_Dev
+      Key: 30fd26c4d0cefb55cff9d790ca9a4cfed2d3b04b9744deda7c440f3580d6d73f
+    POLi:
+      CLIENTCODE: 'SS64008067'
+      AUTHCODE: 'tV4!vD8HkqM43'
+    Paystation:
+      pstn_pi: 615684
+      pstn_HMAC: 1rHH8jLWLnPBRTrH
+  AdditionalSettings:
+    Paystation:
+      QuickMode: 1
+  EnabledPaymentGateways:
+    - DPS
+    - Paystation
+    - POLi
+  CartlessProducts:
+    - App\Web\Model\MembershipApplication
+
+Leochenftw\eCommerce\eCollector\Model\OrderItem:
+  extensions:
+    - App\Web\Extension\OrderItemExtension
+Leochenftw\eCommerce\eCollector\Model\Order:
+  extensions:
+    - App\Web\Extension\OrderExtension

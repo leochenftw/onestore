@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1196f6c6466bf4b688d3eeeb6ee6b87d",
+    "content-hash": "21bfdf06f023ba4f2d246cdd500751d1",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -1538,16 +1538,16 @@
         },
         {
             "name": "silvershop/silverstripe-hasonefield",
-            "version": "2.1.1",
+            "version": "2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/silvershop/silverstripe-hasonefield.git",
-                "reference": "0aa39e3db2e69c5c06e3b89cf4b9a12f3a3c4266"
+                "reference": "5b9322737841752f1de47254bdb1413aab20ab26"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/silvershop/silverstripe-hasonefield/zipball/0aa39e3db2e69c5c06e3b89cf4b9a12f3a3c4266",
-                "reference": "0aa39e3db2e69c5c06e3b89cf4b9a12f3a3c4266",
+                "url": "https://api.github.com/repos/silvershop/silverstripe-hasonefield/zipball/5b9322737841752f1de47254bdb1413aab20ab26",
+                "reference": "5b9322737841752f1de47254bdb1413aab20ab26",
                 "shasum": ""
             },
             "require": {
@@ -1582,7 +1582,7 @@
                 }
             ],
             "description": "Edit a has_one relationship using the gridfield editor, triggered by clicking a button.",
-            "time": "2018-10-05T02:40:33+00:00"
+            "time": "2018-10-02T11:44:40+00:00"
         },
         {
             "name": "silverstripe/admin",

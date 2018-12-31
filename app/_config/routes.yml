@@ -1,0 +1,14 @@
+---
+Name: approutes
+After:
+  - '#rootroutes'
+  - '#coreroutes'
+---
+SilverStripe\Control\Director:
+  rules:
+    'api/v/1/product/$ID/$Action' : 'Leochenftw\API\ProductAPI'
+    'api/v/1/store' : 'Leochenftw\API\StoreAPI'
+    'api/v/1/session' : 'Leochenftw\API\SessionAPI'
+    'api/v/1/signin' : 'Leochenftw\API\SigninAPI'
+    'api/v/1/signout' : 'Leochenftw\API\SignoutAPI'
+    'api/v/1/lookup' : 'Leochenftw\API\LookupAPI'
