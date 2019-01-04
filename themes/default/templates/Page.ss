@@ -35,30 +35,34 @@
 </head>
 <body class="$ClassName.ShortName.LowerCase" <% if $i18nScriptDirection %>dir="$i18nScriptDirection"<% end_if %>>
 $SiteConfig.GTMBody.RAW
-<%-- <% include Header %>
-<main id="main" class="main">
+<%-- <% include Header %> --%>
+<%-- <main id="main" class="main">
     $Layout
-</main>
-<% include Footer %> --%>
+</main> --%>
+<%-- <% include Footer %> --%>
 <main id="main">
-    <div class="has-text-centered">
-        <% with $SiteConfig %>
-            <h1 class="title is-1 is-marginless">
-                <% with $Logo.ScaleWidth(360) %>
-                    <img class="is-block" width="$Width" height="$Height" src="$URL" alt="$Up.Up.Title" />
-                <% end_with %>
-            </h1>
-            <% if $GST %>
-                <p><strong>GST</strong>: $GST</p>
-            <% end_if %>
-            <% if $ContactNumber %>
-                <p><strong>Phone</strong>: $ContactNumber</p>
-            <% end_if %>
-            <% if $StoreLocation %>
-                <p style="margin-top: 2rem;"><strong>$StoreLocation</strong></p>
-            <% end_if %>
-        <% end_with %>
-    </div>
+    <% if $URLSegment == 'Security' %>
+        $Layout
+    <% else %>
+        <div class="has-text-centered">
+            <% with $SiteConfig %>
+                <h1 class="title is-1 is-marginless">
+                    <% with $Logo.ScaleWidth(360) %>
+                        <img class="is-block" width="$Width" height="$Height" src="$URL" alt="$Up.Up.Title" />
+                    <% end_with %>
+                </h1>
+                <% if $GST %>
+                    <p><strong>GST</strong>: $GST</p>
+                <% end_if %>
+                <% if $ContactNumber %>
+                    <p><strong>Phone</strong>: $ContactNumber</p>
+                <% end_if %>
+                <% if $StoreLocation %>
+                    <p style="margin-top: 2rem;"><strong>$StoreLocation</strong></p>
+                <% end_if %>
+            <% end_with %>
+        </div>
+    <% end_if %>
 </main>
 <script src="$ThemeDir/dist/main.min.js" defer></script>
 </body>
