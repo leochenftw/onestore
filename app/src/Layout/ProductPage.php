@@ -2,6 +2,7 @@
 
 namespace App\Web\Layout;
 use Page;
+use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\CurrencyField;
 use Leochenftw\eCommerce\eCollector\Model\Product;
@@ -10,6 +11,8 @@ use Leochenftw\eCommerce\eCollector\Model\Order;
 use SilverShop\HasOneField\HasOneButtonField;
 use App\Web\Model\Manufacturer;
 use App\Web\Model\Supplier;
+use Leochenftw\Grid;
+
 /**
  * Description
  *
@@ -41,7 +44,8 @@ class ProductPage extends Product
         'MeasurementUnit'       =>  'Varchar(8)',
         'StockCount'            =>  'Int',
         'Cost'                  =>  'Currency',
-        'StockLowWarningPoint'  =>  'Int'
+        'StockLowWarningPoint'  =>  'Int',
+        'NonDiscountable'       =>  'Boolean'
     ];
 
     public function getData($full = false)
@@ -58,14 +62,16 @@ class ProductPage extends Product
                 'price'         =>  $this->Price,
                 'weight'        =>  $this->UnitWeight,
                 'outofstock'    =>  $this->OutOfStock,
-                'lowpoint'      =>  $this->StockLowWarningPoint
+                'lowpoint'      =>  $this->StockLowWarningPoint,
+                'discountable'  =>  !$this->NonDiscountable
             ];
         }
 
         return [
-            'id'    =>  $this->ID,
-            'title' =>  $this->Title,
-            'price' =>  $this->Price
+            'id'            =>  $this->ID,
+            'title'         =>  $this->Title,
+            'price'         =>  $this->Price,
+            'discountable'  =>  !$this->NonDiscountable
         ];
     }
 
@@ -82,7 +88,14 @@ class ProductPage extends Product
      * @var array
      */
     private static $has_one = [
-        'Manufacturer'  =>  Manufacturer::class,
+        'Manufacturer'  =>  Manufacturer::class
+    ];
+
+    /**
+     * Many_many relationship
+     * @var array
+     */
+    private static $many_many = [
         'Supplier'      =>  Supplier::class
     ];
 
@@ -124,14 +137,29 @@ class ProductPage extends Product
             'Price'
         );
 
+        $fields->addFieldToTab(
+            'Root.ProductDetails',
+            CheckboxField::create(
+                'NonDiscountable',
+                'Product is not discountable'
+            ),
+            'UnitWeight'
+        );
+
         $fields->addFieldsToTab(
             'Root.ProductDetails',
             [
                 TextField::create('MeasurementUnit'),
-                HasOneButtonField::create($this, "Manufacturer")->setDescription('This is what <strong>PRODUCES</strong> the product.'),
-                HasOneButtonField::create($this, "Supplier")->setDescription('This is who <strong>SUPPLIES</strong> you the product.')
+                HasOneButtonField::create($this, "Manufacturer")->setDescription('This is what <strong>PRODUCES</strong> the product.')
             ]
         );
+
+        if ($this->exists()) {
+            $fields->addFieldToTab(
+                'Root.Suppliers',
+                Grid::make('Supplier', 'Suppliers', $this->Supplier(), false, 'GridFieldConfig_RelationEditor')
+            );
+        }
 
         return $fields;
     }

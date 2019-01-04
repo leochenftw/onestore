@@ -5,6 +5,7 @@ use Leochenftw\Restful\RestfulController;
 use Leochenftw\Debugger;
 use App\Web\Model\Discount;
 use App\Web\Layout\ProductPage;
+use Leochenftw\eCommerce\eCollector\Model\Order;
 
 class LookupAPI extends RestfulController
 {
@@ -29,7 +30,15 @@ class LookupAPI extends RestfulController
             }
 
             return $this->httpError(404, 'Discount not found!');
-        } else if ($product = ProductPage::get()->filter(['Barcode' => $lookup])->first()) {
+        } elseif (strpos($lookup, 'RECEIPT-') === 0) {
+            $lookup =  str_replace('RECEIPT-', '', $lookup);
+            if ($order = Order::get()->filter(['ReceiptNumber' => $lookup])->first()) {
+                return [
+                    'type'  =>  'receipt',
+                    'data'  =>  $order->getData()
+                ];
+            }
+        } elseif ($product = ProductPage::get()->filter(['Barcode' => $lookup])->first()) {
             return [
                 'type'  =>  'product',
                 'data'  =>  $product->getData()

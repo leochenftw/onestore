@@ -12,3 +12,4 @@ SilverStripe\Control\Director:
     'api/v/1/signin' : 'Leochenftw\API\SigninAPI'
     'api/v/1/signout' : 'Leochenftw\API\SignoutAPI'
     'api/v/1/lookup' : 'Leochenftw\API\LookupAPI'
+    'api/v/1/store-order' : 'Leochenftw\API\StoreOrderAPI'

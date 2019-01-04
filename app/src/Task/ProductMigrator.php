@@ -7,7 +7,7 @@ use GuzzleHttp\Client;
 use App\Web\Layout\ProductPage;
 use App\Web\Layout\ProductLandingPage;
 use SilverStripe\Versioned\Versioned;
-use App\Web\Model\Manufacturer;
+use App\Web\Model\Supplier;
 
 /**
  * Description
@@ -61,7 +61,22 @@ class ProductMigrator extends BuildTask
     private function import(&$products)
     {
         $i  =   0;
+        $n  =   0;
         foreach ($products as $product) {
+            if (!empty($product->manufacturer)) {
+                if ($product->manufacturer == '1') {
+                    $n++;
+                    Debugger::inspect("\033[01;31mSkipping " . $product->title . "\033[0m.", false);
+                    continue;
+                } else {
+                    $supplier           =   Supplier::get()->filter(['Title' => $product->manufacturer])->first();
+                    if (empty($supplier)) {
+                        $supplier   =   Supplier::create();
+                    }
+                    $supplier->Title    =   $product->manufacturer;
+                    $supplier->write();
+                }
+            }
 
             $item   =   ProductPage::get()->filter(['Barcode' => $product->barcode])->first();
 
@@ -79,23 +94,20 @@ class ProductMigrator extends BuildTask
             $item->Price            =   $product->price;
             $item->UnitWeight       =   $product->weight;
 
-            if (!empty($product->manufacturer)) {
-                $manufacturer   =   Manufacturer::get()->filter(['Title' => $product->manufacturer])->first();
-                if (empty($manufacturer)) {
-                    $manufacturer           =   Manufacturer::create();
-                }
-                $manufacturer->Title    =   $product->manufacturer;
-                $manufacturer->write();
-                $item->ManufacturerID   =   $manufacturer->ID;
-            }
-
             $item->write();
             $item->writeToStage('Live');
+
+            if (!empty($supplier)) {
+                $item->Supplier()->add($supplier->ID);
+                $item->write();
+                $item->writeToStage('Live');
+            }
+
             $i++;
             Debugger::inspect("\033[01;31m" . $item->Title . "\033[0m" . ' has been created/updated.', false);
         }
 
-        Debugger::inspect("\033[01;31m" . $i . " items \033[0m" . ' added/created.', false);
+        Debugger::inspect("\033[01;31m" . $i . " items \033[0m added/created.\n\033[01;31m" . $n . " items \033[0m skipped.", false);
     }
 
     private function fetch_products()

@@ -1,2 +1,12 @@
 @import 'https://use.fontawesome.com/releases/v5.2.0/css/all.css';
 @import 'bulma';
+html {
+    background-color: #ffe900;
+}
+
+#main {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

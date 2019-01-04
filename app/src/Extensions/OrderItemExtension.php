@@ -8,6 +8,13 @@ use App\Web\Layout\ProductPage;
 class OrderItemExtension extends DataExtension
 {
     /**
+     * Database fields
+     * @var array
+     */
+    private static $db = [
+        'isRefunded'    =>  'Boolean'
+    ];
+    /**
      * Has_one relationship
      * @var array
      */
@@ -20,10 +27,11 @@ class OrderItemExtension extends DataExtension
      * @var array
      */
     private static $summary_fields = [
-        'makeTitle'     =>  'Product',
-        'UnitPrice'     =>  'Unit Price',
-        'Quantity'      =>  'Quantity',
-        'Subtotal'      =>  'Subtotal'
+        'makeTitle'         =>  'Product',
+        'isRefundedItem'    =>  'is refunded Item',
+        'UnitPrice'         =>  'Unit Price',
+        'Quantity'          =>  'Quantity',
+        'Subtotal'          =>  'Subtotal'
     ];
 
     public function makeTitle()
@@ -35,6 +43,11 @@ class OrderItemExtension extends DataExtension
         }
 
         return '-';
+    }
+
+    public function isRefundedItem()
+    {
+        return $this->owner->isRefunded ? 'Yes' : 'No';
     }
 
     /**
@@ -52,6 +65,17 @@ class OrderItemExtension extends DataExtension
         }
     }
 
+    public function getData()
+    {
+        if ($this->owner->Product()->exists()) {
+            $data               =   $this->owner->Product()->getData();
+            $data['quantity']   =   $this->owner->Quantity;
+            return $data;
+        }
+
+        return null;
+    }
+
     /**
      * Event handler called after writing to the database.
      */
@@ -59,7 +83,7 @@ class OrderItemExtension extends DataExtension
     {
         parent::onAfterWrite();
 
-        if ($this->owner->Order()->exists()) {
+        if ($this->owner->Order()->exists() && $this->owner->Order()->Status == 'Pending') {
             $this->owner->Order()->UpdateAmountWeight();
         }
     }

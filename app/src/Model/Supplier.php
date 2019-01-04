@@ -38,10 +38,10 @@ class Supplier extends DataObject
     ];
 
     /**
-     * Has_many relationship
+     * Belongs_many_many relationship
      * @var array
      */
-    private static $has_many = [
+    private static $belongs_many_many = [
         'Products'  =>  ProductPage::class
     ];
 }

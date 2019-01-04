@@ -48,8 +48,9 @@ class Discount extends DataObject
     public function getData()
     {
         return [
+            'id'    =>  $this->ID,
             'title' =>  $this->Title,
-            'type'  =>  $this->type,
+            'type'  =>  $this->Type,
             'value' =>  $this->Value
         ];
     }
