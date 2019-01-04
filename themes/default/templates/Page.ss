@@ -6,6 +6,7 @@
 <!--[if IE 7 ]><html lang="$ContentLocale" class="ie ie7"><![endif]-->
 <!--[if IE 8 ]><html lang="$ContentLocale" class="ie ie8"><![endif]-->
 <head>
+    <!-- Hello, goodbye - Leo Chen -->
     $SiteConfig.GoogleSiteVerificationCode.RAW
     <% base_tag %>
     <title><% if $MetaTitle %>$MetaTitle<% else %>$Title<% end_if %></title>
@@ -52,6 +53,9 @@ $SiteConfig.GTMBody.RAW
             <% end_if %>
             <% if $ContactNumber %>
                 <p><strong>Phone</strong>: $ContactNumber</p>
+            <% end_if %>
+            <% if $StoreLocation %>
+                <p style="margin-top: 2rem;"><strong>$StoreLocation</strong></p>
             <% end_if %>
         <% end_with %>
     </div>
