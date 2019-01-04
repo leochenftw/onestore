@@ -86,6 +86,16 @@ class OrderItemExtension extends DataExtension
         if ($this->owner->Order()->exists() && $this->owner->Order()->Status == 'Pending') {
             $this->owner->Order()->UpdateAmountWeight();
         }
+
+        if ($this->owner->Product()->exists()) {
+            if ($this->owner->isRefunded) {
+                $this->owner->Product()->StockCount += $this->owner->Quantity;
+            } else {
+                $this->owner->Product()->StockCount -= $this->owner->Quantity;
+            }
+            $this->owner->Product()->write();
+            $this->owner->Product()->writeToStage('Live');
+        }
     }
 
     public function UnitPrice()

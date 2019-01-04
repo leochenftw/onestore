@@ -48,6 +48,16 @@ class ProductPage extends Product
         'NonDiscountable'       =>  'Boolean'
     ];
 
+    /**
+     * Defines a default list of filters for the search context
+     * @var array
+     */
+    private static $searchable_fields = [
+        'Title',
+        'Alias',
+        'Barcode'
+    ];
+
     public function getData($full = false)
     {
         if ($full) {
