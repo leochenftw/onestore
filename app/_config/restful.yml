@@ -33,7 +33,7 @@ Leochenftw\Restful\RestfulController:
 #   password_name: password
 # NestedResourceRestController:
 #   root_resource_id_field: ID
-
+---
 Only:
   environment: 'live'
 ---
