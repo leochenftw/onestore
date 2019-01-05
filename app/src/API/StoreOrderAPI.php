@@ -21,21 +21,25 @@ class StoreOrderAPI extends RestfulController
     {
         if (($list = $request->postVar('list')) && ($by = $request->postVar('by'))) {
             $list       =   json_decode($list);
+            $cash_taken =   !empty($request->postVar('cash_taken')) ? $request->postVar('cash_taken') : null;
             if (!empty($request->postVar('discount'))) {
-                return $this->place_order($list, $by, $request->postVar('discount'));
+                return $this->place_order($list, $by, $cash_taken, $request->postVar('discount'));
             }
-            return $this->place_order($list, $by);
+            return $this->place_order($list, $by, $cash_taken);
         }
 
         return $this->httpError(400, 'Invalid request');
     }
 
-    private function place_order(&$list, $by, $discount = null)
+    private function place_order(&$list, $by, $cash_taken = null, $discount = null)
     {
         $order                  =   Order::create();
         $order->isStoreOrder    =   true;
         $order->PaidBy          =   $by;
         $order->Status          =   'Completed';
+        if (!is_null($cash_taken)) {
+            $order->CashTaken   =   $cash_taken;
+        }
         if (!empty($discount)) {
             $order->DiscountID  =   $discount;
         }

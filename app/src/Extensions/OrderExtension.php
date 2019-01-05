@@ -13,7 +13,8 @@ class OrderExtension extends DataExtension
     private static $db = [
         'isStoreOrder'  =>  'Boolean',
         'PaidBy'        =>  'Enum("Cash,EFTPOS")',
-        'ReceiptNumber' =>  'Varchar(36)'
+        'ReceiptNumber' =>  'Varchar(36)',
+        'CashTaken'     =>  'Currency'
     ];
 
     /**
@@ -93,7 +94,8 @@ class OrderExtension extends DataExtension
                 'at'        =>  $this->owner->LastEdited,
                 'by'        =>  $this->owner->Operator()->exists() ? $this->owner->Operator()->Title : 'Anonymous',
                 'barcode'   =>  'RECEIPT-' . $this->owner->ReceiptNumber,
-                'method'    =>  $this->owner->PaidBy
+                'method'    =>  $this->owner->PaidBy,
+                'cash'      =>  $this->owner->CashTaken
             ]
         ];
     }
