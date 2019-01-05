@@ -60,7 +60,8 @@ class StoreOrderAPI extends RestfulController
         return [
             'at'        =>  $order->LastEdited,
             'by'        =>  $order->Operator()->exists() ? $order->Operator()->Title : 'Anonymous',
-            'barcode'   =>  'RECEIPT-' . $order->ReceiptNumber
+            'barcode'   =>  'RECEIPT-' . $order->ReceiptNumber,
+            'cash'      =>  $order->CashTaken
         ];
     }
 }
