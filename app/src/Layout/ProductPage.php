@@ -11,6 +11,7 @@ use Leochenftw\eCommerce\eCollector\Model\Order;
 use SilverShop\HasOneField\HasOneButtonField;
 use App\Web\Model\Manufacturer;
 use App\Web\Model\Supplier;
+use App\Web\Model\Expiry;
 use Leochenftw\Grid;
 
 /**
@@ -71,9 +72,12 @@ class ProductPage extends Product
                 'cost'          =>  $this->Cost,
                 'price'         =>  $this->Price,
                 'weight'        =>  $this->UnitWeight,
-                'outofstock'    =>  $this->OutOfStock,
+                'outofstock'    =>  (Boolean) $this->OutOfStock,
                 'lowpoint'      =>  $this->StockLowWarningPoint,
-                'discountable'  =>  !$this->NonDiscountable
+                'discountable'  =>  !$this->NonDiscountable,
+                'updated'       =>  $this->LastEdited,
+                'expiries'      =>  $this->ExpiryDates()->getData(),
+                'is_published'  =>  $this->isPublished()
             ];
         }
 
@@ -106,7 +110,8 @@ class ProductPage extends Product
      * @var array
      */
     private static $many_many = [
-        'Supplier'      =>  Supplier::class
+        'Supplier'      =>  Supplier::class,
+        'ExpiryDates'   =>  Expiry::class
     ];
 
     /**

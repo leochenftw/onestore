@@ -26,7 +26,10 @@ class SigninAPI extends RestfulController
                 if ($encryptor->check($member->Password, $pass, $member->Salt, $member)) {
                     Injector::inst()->get(IdentityStore::class)->logIn($member, true);
                     return  [
-                        'message'   =>  'Sign in success!'
+                        'id'            =>  $member->ID,
+                        'first_name'    =>  $member->FirstName,
+                        'surname'       =>  $member->Surname,
+                        'email'         =>  $member->Email
                     ];
                 }
 

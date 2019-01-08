@@ -23,3 +23,11 @@ SilverStripe\Assets\Flysystem\AssetAdapter:
     dir:
       public: 0775
       private: 0775
+
+SilverStripe\ORM\DataList:
+  extensions:
+    - App\Web\Extension\DataListExtension
+
+SilverStripe\ORM\ArrayList:
+  extensions:
+    - App\Web\Extension\DataListExtension

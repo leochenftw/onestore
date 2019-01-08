@@ -162,7 +162,15 @@ abstract class RestfulController extends Controller
 
     protected function addCORSHeaders($response)
     {
-        $response->addHeader('Access-Control-Allow-Origin', $this->config()->CORSOrigin);
+        $default_origin     =   $this->config()->CORSOrigin;
+        $allowed_origins    =   $this->config()->CORSOrigins;
+
+        if (in_array($this->request->getHeader('origin'), $allowed_origins)) {
+            $response->addHeader('Access-Control-Allow-Origin', $this->request->getHeader('origin'));
+        } else {
+            $response->addHeader('Access-Control-Allow-Origin', $default_origin);
+        }
+
         $response->addHeader('Access-Control-Allow-Methods', $this->config()->CORSMethods);
         $response->addHeader('Access-Control-Max-Age', $this->config()->CORSMaxAge);
         $response->addHeader('Access-Control-Allow-Headers', $this->config()->CORSAllowHeaders);
