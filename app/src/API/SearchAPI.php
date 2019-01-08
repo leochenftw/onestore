@@ -21,18 +21,22 @@ class SearchAPI extends RestfulController
     public function post($request)
     {
         if ($term = $request->postVar('term')) {
-            $barcode_result =   Versioned::get_by_stage(ProductPage::class, 'Stage')->filter(['Barcode' => $term]);
+            $barcode_result     =   Versioned::get_by_stage(ProductPage::class, 'Stage')->filter(['Barcode' => $term]);
             if ($barcode_result->count() > 0) {
                 return [
                     'total_page'    =>  0,
                     'list'          =>  $this->get_list($barcode_result)
                 ];
             }
+
             $page               =   $request->postVar('page');
+            $sort               =   !empty($request->postVar('sort')) ? $request->postVar('sort') : 'Title';
+            $by                 =   !empty($request->postVar('by')) ? $request->postVar('by') : 'ASC';
             $title_result       =   ProductPage::get()->filterAny(['Title:PartialMatch' => $term, 'Alias:PartialMatch' => $term]);
+
             if ($title_result->count() > 0) {
                 $count          =   $title_result->count();
-                $title_result   =   $title_result->limit($this->page_size, $page * $this->page_size);
+                $title_result   =   $title_result->sort([$sort => $by])->limit($this->page_size, $page * $this->page_size);
                 return [
                     'total_page'    =>  ceil($count / $this->page_size),
                     'list'          =>  $this->get_list($title_result)

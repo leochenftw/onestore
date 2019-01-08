@@ -31,9 +31,13 @@ class ProductAPI extends RestfulController
         }
 
         $page       =   !empty($request->getVar('page')) ? $request->getVar('page') : 0;
+        $sort       =   !empty($request->getVar('sort')) ? $request->getVar('sort') : 'Title';
+        $by         =   !empty($request->getVar('by')) ? $request->getVar('by') : 'ASC';
+
         $products   =   ProductPage::get();
         $count      =   $products->count();
-        $products   =   $products->limit($this->page_size, $page * $this->page_size);
+        $products   =   $products->sort([$sort => $by])->limit($this->page_size, $page * $this->page_size);
+
         return [
             'total_page'    =>  ceil($count / $this->page_size),
             'list'          =>  $this->get_list($products)
