@@ -47,7 +47,7 @@ class SearchAPI extends RestfulController
 
         }
 
-        return $this->httpError(404, 'Missing search term');
+        return $this->httpError(400, 'Missing search term');
     }
 
     private function get_list(&$products)

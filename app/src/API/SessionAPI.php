@@ -18,11 +18,6 @@ class SessionAPI extends RestfulController
     public function get($request)
     {
         $member =   Member::currentUser();
-        return  [
-            'id'            =>  $member->ID,
-            'first_name'    =>  $member->FirstName,
-            'surname'       =>  $member->Surname,
-            'email'         =>  $member->Email
-        ];
+        return  $member->getData();
     }
 }

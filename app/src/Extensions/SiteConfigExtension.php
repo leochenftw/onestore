@@ -71,7 +71,8 @@ class SiteConfigExtension extends DataExtension
             'slogan'    =>  $this->owner->Tagline,
             'gst'       =>  $this->owner->GST,
             'phone'     =>  $this->owner->ContactNumber,
-            'email'     =>  $this->owner->ContactEmail
+            'email'     =>  $this->owner->ContactEmail,
+            'location'  =>  $this->owner->StoreLocation
         ];
     }
 }

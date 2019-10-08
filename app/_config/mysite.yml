@@ -31,3 +31,7 @@ SilverStripe\ORM\DataList:
 SilverStripe\ORM\ArrayList:
   extensions:
     - App\Web\Extension\DataListExtension
+
+SilverStripe\Security\Member:
+  extensions:
+    - App\Web\Extension\MemberExension

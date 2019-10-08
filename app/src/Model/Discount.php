@@ -42,16 +42,17 @@ class Discount extends DataObject
         parent::onBeforeWrite();
 
         $member         =   Member::currentUser();
-        $this->Token    =   substr(sha1($member->ID. '-' . $this->Type . '-' . $this->Value), 0, 16);
+        $this->Token    =   substr(sha1($member->ID. '-' . $this->Type . '-' . $this->Value), 0, 7);
     }
 
     public function getData()
     {
         return [
-            'id'    =>  $this->ID,
-            'title' =>  $this->Title,
-            'type'  =>  $this->Type,
-            'value' =>  $this->Value
+            'id'        =>  $this->ID,
+            'title'     =>  $this->Title,
+            'type'      =>  $this->Type,
+            'value'     =>  $this->Value,
+            'barcode'   =>  'DISCOUNT-' . $this->Token
         ];
     }
 }
