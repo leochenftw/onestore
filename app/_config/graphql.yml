@@ -1,0 +1,50 @@
+---
+Name: onestop_graphql
+After: graphql-filters
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\GraphQL\QueryFilter\FilterRegistryInterface:
+    class: SilverStripe\GraphQL\QueryFilter\FieldFilterRegistry
+    constructor:
+      endswith: '%$SilverStripe\GraphQL\QueryFilter\Filters\EndsWithFilter'
+      startswith: '%$SilverStripe\GraphQL\QueryFilter\Filters\StartsWithFilter'
+
+SilverStripe\GraphQL\Manager:
+  schemas:
+    default:
+      types:
+        member: 'App\Web\GraphQL\Type\MemberTypeCreator'
+      queries:
+        readMembers: 'App\Web\GraphQL\Query\ReadMembersQueryCreator'
+        listOperators: 'App\Web\GraphQL\Query\ListOperatorsQueryCreator'
+      mutations:
+        createOperator: 'App\Web\GraphQL\Mutation\CreateOperatorMutationCreator'
+        updateOperator: App\Web\GraphQL\Mutation\UpdateOperatorMutationCreator
+        suspendOperator: App\Web\GraphQL\Mutation\SuspendOperator
+      scaffolding_providers:
+        - App\Web\Model\Supplier
+      scaffolding:
+        types:
+          App\Web\Model\Supplier:
+            fields: [ID, Title, Alias, Email, Phone, NumProducts, Memo]
+            operations:
+              read:
+                filters:
+                  Title:
+                    startswith: true
+                  ID: true
+              create: true
+              update: true
+              delete: true
+
+SilverStripe\Control\Director:
+  rules:
+    graphql: '%$SilverStripe\GraphQL\Controller.default'
+
+SilverStripe\GraphQL\Controller:
+  cors:
+    Enabled: true
+    Allow-Origin: '*'
+    Allow-Headers: 'Authorization, Content-Type, X-Requested-With, X-CSRF-TOKEN'
+    Allow-Methods:  'GET, POST, OPTIONS'
+    Allow-Credentials: 'true'

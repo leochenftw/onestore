@@ -2,7 +2,7 @@
 
 namespace Web\App\ModelAdmin;
 use SilverStripe\Admin\ModelAdmin;
-use App\Web\Model\Discount;
+use App\Web\Member\Operator;
 
 /**
  * Description
@@ -10,27 +10,27 @@ use App\Web\Model\Discount;
  * @package silverstripe
  * @subpackage mysite
  */
-class DiscountAdmin extends ModelAdmin
+class OperatorAdmin extends ModelAdmin
 {
     /**
      * Managed data objects for CMS
      * @var array
      */
     private static $managed_models = [
-        Discount::class
+        Operator::class
     ];
 
     /**
      * URL Path for CMS
      * @var string
      */
-    private static $url_segment = 'discounts';
+    private static $url_segment = 'operators';
 
     /**
      * Menu title for Left and Main CMS
      * @var string
      */
-    private static $menu_title = 'Discounts';
+    private static $menu_title = 'Operators';
 
 
 }

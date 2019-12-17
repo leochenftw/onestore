@@ -30,6 +30,8 @@ Leochenftw\Restful\RestfulController:
     - 'https://localhost:8083'
     - 'https://localhost:8084'
     - 'https://localhost:8085'
+    - 'https://store.one-stop.co.nz'
+    - 'https://admin.one-stop.co.nz'
   CORSMethods: 'GET, PUT, POST, DELETE, OPTIONS'
   CORSMaxAge: '1000'
   CORSAllowHeaders: 'Content-Type, Authorization, X-Requested-With'

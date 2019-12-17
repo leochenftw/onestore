@@ -41,7 +41,7 @@ class StoreOrderAPI extends RestfulController
             $order->CashTaken   =   $cash_taken;
         }
         if (!empty($discount)) {
-            $order->DiscountID  =   $discount;
+            $order->DiscountEntryID =   $discount;
         }
 
         $order->write();

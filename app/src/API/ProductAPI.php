@@ -6,7 +6,10 @@ use Leochenftw\Debugger;
 use App\Web\Layout\ProductPage;
 use SilverStripe\Versioned\Versioned;
 use App\Web\Model\Expiry;
+use App\Web\Model\Manufacturer;
+use App\Web\Model\Supplier;
 use App\Web\Layout\ProductLandingPage;
+use Leochenftw\Util;
 
 class ProductAPI extends RestfulController
 {
@@ -24,10 +27,14 @@ class ProductAPI extends RestfulController
     {
         if ($id = $request->param('ID')) {
             // return $id;
-            if ($product = Versioned::get_by_stage(ProductPage::class, 'Stage')->byID($id)) {
-                return $product->getData(true);
+            if ($id != 'All') {
+                if ($product = Versioned::get_by_stage(ProductPage::class, 'Stage')->byID($id)) {
+                    return $product->getData(true);
+                }
+                return $this->httpError(404, 'Not found');
+            } elseif ($action = $request->param('Action')) {
+                return $this->$action($request);
             }
-            return $this->httpError(404, 'Not found');
         }
 
         $page       =   !empty($request->getVar('page')) ? $request->getVar('page') : 0;
@@ -43,6 +50,25 @@ class ProductAPI extends RestfulController
             'list'          =>  $this->get_list($products)
         ];
     }
+
+    private function get_csv_list(&$products)
+    {
+        $data   =   [];
+        foreach ($products as $product) {
+            $data[] =   [
+                'Barcode'       =>  $product->Barcode,
+                'English'       =>  $product->Title,
+                'Chinese'       =>  $product->Alias,
+                'Cost'          =>  $product->Cost,
+                'Price'         =>  $product->Price,
+                'Stock'         =>  $product->StockCount,
+                'Supplier'      =>  implode(', ', $product->Supplier()->column('Title')),
+                'Ceased'        =>  !$product->isPublished()
+            ];
+        }
+        return $data;
+    }
+
 
     private function get_list(&$products)
     {
@@ -72,6 +98,14 @@ class ProductAPI extends RestfulController
         return $this->httpError(400, 'Missing action!');
     }
 
+    private function download(&$request)
+    {
+        $products   =   Versioned::get_by_stage(ProductPage::class, 'Stage');
+        $json       =   $this->get_csv_list($products);
+
+        return Util::jsonToCsv($json, false, true);
+    }
+
     private function edit(&$request)
     {
         $id         =   $request->param('ID');
@@ -93,6 +127,17 @@ class ProductAPI extends RestfulController
             $product->ParentID  =   $parent->ID;
         }
 
+        if ($manufacturer_title = trim($request->postVar('manufacturer'))) {
+            $manufacturer   =   Manufacturer::get()->filter(['Title' => $manufacturer_title])->first();
+
+            if (empty($manufacturer)) {
+                $manufacturer           =   Manufacturer::create();
+                $manufacturer->Title    =   $manufacturer_title;
+                $manufacturer->write();
+            }
+            $product->ManufacturerID    =   $manufacturer->ID;
+        }
+
         $product->writeToStage('Stage');
 
         if ($product->isPublished()) {
@@ -107,15 +152,21 @@ class ProductAPI extends RestfulController
             $product->ExpiryDates()->add($expiry_object->ID);
         }
 
-        // $product->dd    =   ;
+        $product->Supplier()->removeAll();
 
-        // 'weight'        =>  $this->,
-        // 'outofstock'    =>  $this->,
-        // 'lowpoint'      =>  $this->,
-        // 'discountable'  =>  !$this->,
-        // 'updated'       =>  $this->LastEdited,
-        // 'expiries'      =>  $this->()->getData(),
-        // 'is_published'  =>  $this->isPublished()
+        if ($supplier_names = $request->postVar('supplier')) {
+            $arr    =   explode(',', $supplier_names);
+            foreach ($arr as $name) {
+                $name       =   trim($name);
+                $supplier   =   Supplier::get()->filter(['Title' => $name])->first();
+                if (empty($supplier)) {
+                    $supplier   =   Supplier::create();
+                    $supplier->Title    =   $name;
+                    $supplier->write();
+                }
+                $product->Supplier()->add($supplier->ID);
+            }
+        }
 
         return [
             'published' =>  $product->isPublished(),

@@ -4,6 +4,7 @@ namespace Leochenftw\API;
 use Leochenftw\Restful\RestfulController;
 use Leochenftw\Debugger;
 use SilverStripe\Security\Member;
+use SilverStripe\Security\SecurityToken;
 
 class SessionAPI extends RestfulController
 {
@@ -18,6 +19,9 @@ class SessionAPI extends RestfulController
     public function get($request)
     {
         $member =   Member::currentUser();
-        return  $member->getData();
+        return [
+            'member'    =>  $member->getData(),
+            'csrf'      =>  SecurityToken::inst()->getValue()
+        ];
     }
 }

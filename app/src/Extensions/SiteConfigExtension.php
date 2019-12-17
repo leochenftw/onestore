@@ -68,6 +68,7 @@ class SiteConfigExtension extends DataExtension
         return [
             'logo'      =>  $logo->exists() ? $logo->ScaleHeight(80)->getAbsoluteURL() : null,
             'title'     =>  $this->owner->Title,
+            'logo'      =>  $this->owner->Logo()->getData('ScaleWidth', 120),
             'slogan'    =>  $this->owner->Tagline,
             'gst'       =>  $this->owner->GST,
             'phone'     =>  $this->owner->ContactNumber,

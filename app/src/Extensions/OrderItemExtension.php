@@ -69,6 +69,8 @@ class OrderItemExtension extends DataExtension
     {
         if ($this->owner->Product()->exists()) {
             $data               =   $this->owner->Product()->getData();
+            $data['prod_id']    =   $data['id'];
+            $data['id']         =   $this->owner->ID;
             $data['quantity']   =   $this->owner->Quantity;
             $data['refund']     =   $this->owner->isRefunded;
             return $data;

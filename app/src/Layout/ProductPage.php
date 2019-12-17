@@ -75,6 +75,8 @@ class ProductPage extends Product
                 'outofstock'    =>  (Boolean) $this->OutOfStock,
                 'lowpoint'      =>  $this->StockLowWarningPoint,
                 'discountable'  =>  !$this->NonDiscountable,
+                'manufacturer'  =>  $this->Manufacturer()->Title,
+                'supplier'      =>  implode(', ', $this->Supplier()->column('Title')),
                 'updated'       =>  $this->LastEdited,
                 'expiries'      =>  $this->ExpiryDates()->getData(),
                 'is_published'  =>  $this->isPublished()

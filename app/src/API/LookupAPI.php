@@ -3,7 +3,7 @@
 namespace Leochenftw\API;
 use Leochenftw\Restful\RestfulController;
 use Leochenftw\Debugger;
-use App\Web\Model\Discount;
+use Leochenftw\eCommerce\eCollector\Model\Discount;
 use App\Web\Layout\ProductPage;
 use Leochenftw\eCommerce\eCollector\Model\Order;
 
@@ -20,9 +20,9 @@ class LookupAPI extends RestfulController
     public function post($request)
     {
         $lookup =   $request->postVar('input');
-        if (strpos($lookup, 'DISCOUNT-') === 0) {
-            $lookup =   str_replace('DISCOUNT-', '', $lookup);
-            if ($discount = Discount::get()->filter(['Token' => $lookup])->first()) {
+        if (strpos($lookup, 'DCNT-') === 0) {
+            $lookup =   str_replace('DCNT-', '', $lookup);
+            if ($discount = Discount::get()->filter(['CouponCode' => $lookup])->first()) {
                 return [
                     'type'  =>  'discount',
                     'data'  =>  $discount->getData()

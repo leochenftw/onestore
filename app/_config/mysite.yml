@@ -35,3 +35,7 @@ SilverStripe\ORM\ArrayList:
 SilverStripe\Security\Member:
   extensions:
     - App\Web\Extension\MemberExension
+
+SilverStripe\Assets\Image:
+  extensions:
+    - App\Web\Extension\ImageExtension

@@ -6,7 +6,6 @@ use Leochenftw\Debugger;
 use App\Web\Layout\ProductPage;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Security\Member;
-use App\Web\Model\Discount;
 use App\Web\Layout\ProductLandingPage;
 
 class MemberAPI extends RestfulController

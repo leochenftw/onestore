@@ -5,7 +5,7 @@ use SilverStripe\ORM\DataExtension;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Security\Member;
 use Leochenftw\Debugger;
-use App\Web\Model\Discount;
+use Leochenftw\eCommerce\eCollector\Model\Discount;
 use Leochenftw\eCommerce\eCollector\Model\OrderItem;
 
 class OrderExtension extends DataExtension
@@ -14,7 +14,27 @@ class OrderExtension extends DataExtension
         'isStoreOrder'  =>  'Boolean',
         'PaidBy'        =>  'Enum("Cash,EFTPOS")',
         'ReceiptNumber' =>  'Varchar(36)',
-        'CashTaken'     =>  'Currency'
+        'CashTaken'     =>  'Currency',
+        'ItemCount'     =>  'Int'
+    ];
+
+    /**
+     * Defines summary fields commonly used in table columns
+     * as a quick overview of the data for this dataobject
+     * @var array
+     */
+    private static $summary_fields = [
+        'ID'            =>  'ID',
+        'ReceiptNumber' =>  'Receipt#',
+        'TotalAmount'   =>  'Amount'
+    ];
+
+    /**
+     * Defines a default list of filters for the search context
+     * @var array
+     */
+    private static $searchable_fields = [
+        'ReceiptNumber'
     ];
 
     /**
@@ -22,8 +42,8 @@ class OrderExtension extends DataExtension
      * @var array
      */
     private static $has_one = [
-        'Discount'  =>  Discount::class,
-        'Operator'  =>  Member::class
+        'DiscountEntry' =>  Discount::class,
+        'Operator'      =>  Member::class
     ];
 
     private static $indexes =   [
@@ -40,6 +60,32 @@ class OrderExtension extends DataExtension
         if (empty($this->owner->OperatorID) && Member::currentUser()) {
             $this->owner->OperatorID    =   Member::currentUser()->ID;
         }
+    }
+
+    /**
+     * Event handler called after writing to the database.
+     */
+    public function onAfterWrite()
+    {
+        parent::onAfterWrite();
+
+        $n  =   $this->getTotalItems();
+
+        if ($this->owner->ItemCount != $n) {
+            $this->owner->ItemCount =   $n;
+            $this->owner->write();
+        }
+    }
+
+    public function getTotalItems()
+    {
+        $n  =   0;
+
+        foreach ($this->owner->Items() as $item) {
+            $n += $item->Quantity;
+        }
+
+        return $n;
     }
 
     public function add_to_cart($product_id, $qty)
@@ -62,8 +108,8 @@ class OrderExtension extends DataExtension
         $factor             =   1;
         $nondiscountable    =   0;
 
-        if ($this->owner->Discount()->exists() && $this->owner->Discount()->Type == 'byPercentage') {
-            $factor     -=  ($this->owner->Discount()->Value * 0.01);
+        if ($this->owner->DiscountEntry()->exists() && $this->owner->DiscountEntry()->Type == 'byPercentage') {
+            $factor     -=  ($this->owner->DiscountEntry()->Value * 0.01);
         }
 
         foreach ($this->owner->Items() as $item) {
@@ -76,8 +122,8 @@ class OrderExtension extends DataExtension
             }
         }
 
-        if ($this->owner->Discount()->exists() && $this->owner->Discount()->Type == 'byAmount') {
-            $amount -=  $this->owner->Discount()->Value;
+        if ($this->owner->DiscountEntry()->exists() && $this->owner->DiscountEntry()->Type == 'byAmount') {
+            $amount -=  $this->owner->DiscountEntry()->Value;
             $amount =   $amount < 0 ? 0 : $amount;
         }
 
@@ -89,14 +135,28 @@ class OrderExtension extends DataExtension
     {
         return [
             'goods'     =>  $this->loop_items(),
-            'discount'  =>  $this->owner->Discount()->exists() ? $this->owner->Discount()->getData() : null,
+            'discount'  =>  $this->owner->DiscountEntry()->exists() ? $this->owner->DiscountEntry()->getData() : null,
             'order'     =>  [
+                'amount'    =>  $this->owner->TotalAmount,
                 'at'        =>  $this->owner->LastEdited,
                 'by'        =>  $this->owner->Operator()->exists() ? $this->owner->Operator()->Title : 'Anonymous',
                 'barcode'   =>  'RECEIPT-' . $this->owner->ReceiptNumber,
                 'method'    =>  $this->owner->PaidBy,
                 'cash'      =>  $this->owner->CashTaken
             ]
+        ];
+    }
+
+    public function getListData()
+    {
+        return [
+            'id'                =>  $this->owner->ID,
+            'receipt'           =>  $this->owner->ReceiptNumber,
+            'datetime'          =>  $this->owner->Created,
+            'amount'            =>  $this->owner->TotalAmount,
+            'item_count'        =>  $this->getTotalItems(),
+            'payment_method'    =>  $this->owner->PaidBy,
+            'by'                =>  $this->owner->Operator()->exists() ? $this->owner->Operator()->Title : 'Anonymous'
         ];
     }
 

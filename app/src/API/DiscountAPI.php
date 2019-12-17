@@ -1,11 +1,13 @@
 <?php
 
 namespace Leochenftw\API;
+use Leochenftw\eCommerce\eCollector\Model\OrderItem;
+use Leochenftw\eCommerce\eCollector\Model\Order;
 use Leochenftw\Restful\RestfulController;
 use Leochenftw\Debugger;
 use App\Web\Layout\ProductPage;
 use SilverStripe\Versioned\Versioned;
-use App\Web\Model\Discount;
+use Leochenftw\eCommerce\eCollector\Model\Discount;
 use App\Web\Layout\ProductLandingPage;
 
 class DiscountAPI extends RestfulController
@@ -22,10 +24,13 @@ class DiscountAPI extends RestfulController
     public function get($request)
     {
         if ($id = $request->param('ID')) {
+            if ($discount = Discount::get()->byID($id)) {
+                return $discount->getData();
+            }
             return $this->httpError(404, 'Not found');
         }
 
-        $discounts  =   Discount::get();
+        $discounts  =   Discount::get()->filter(['Used' => false]);
         return $discounts->getData();
     }
 
@@ -38,91 +43,47 @@ class DiscountAPI extends RestfulController
         return $this->httpError(400, 'Missing action!');
     }
 
-    private function edit(&$request)
+    private function create_discount(&$request)
     {
-        $id         =   $request->param('ID');
-        $product    =   empty($id) ? ProductPage::create() : Versioned::get_by_stage(ProductPage::class, 'Stage')->byID($id);
+        $discount               =   Discount::create();
+        $discount->Title        =   $request->postVar('label');
+        $discount->DiscountBy   =   $request->postVar('type') == 'by_percentage' ? 'ByPercentage' : 'ByValue';
+        $discount->DiscountRate =   $request->postVar('rate');
+        $discount->InfiniteUse  =   true;
+        $discount->write();
 
-        $product->Barcode               =   $request->postVar('barcode');
-        $product->Title                 =   $request->postVar('title');
-        $product->Alias                 =   $request->postVar('alias');
-        $product->MeasurementUnit       =   $request->postVar('unit');
-        $product->StockCount            =   $request->postVar('stockcount');
-        $product->Cost                  =   $request->postVar('cost');
-        $product->Price                 =   $request->postVar('price');
-        $product->UnitWeight            =   $request->postVar('weight');
-        $product->OutOfStock            =   $request->postVar('outofstock');
-        $product->StockLowWarningPoint  =   $request->postVar('lowpoint');
-        $product->NonDiscountable       =   $request->postVar('discountable') == 'true' ? 0 : 1;
-
-        if ($parent = ProductLandingPage::get()->first()) {
-            $product->ParentID  =   $parent->ID;
-        }
-
-        $product->writeToStage('Stage');
-
-        if ($product->isPublished()) {
-            $product->writeToStage('Live');
-        }
-
-        $product->ExpiryDates()->removeAll();
-
-        $expiries   =   json_decode($request->postVar('expiries'));
-        foreach ($expiries as $expiry) {
-            $expiry_object  =   $this->get_expiry_object($expiry);
-            $product->ExpiryDates()->add($expiry_object->ID);
-        }
-
-        // $product->dd    =   ;
-
-        // 'weight'        =>  $this->,
-        // 'outofstock'    =>  $this->,
-        // 'lowpoint'      =>  $this->,
-        // 'discountable'  =>  !$this->,
-        // 'updated'       =>  $this->LastEdited,
-        // 'expiries'      =>  $this->()->getData(),
-        // 'is_published'  =>  $this->isPublished()
-
-        return [
-            'published' =>  $product->isPublished(),
-            'barcode'   =>  $product->Barcode,
-            'message'   =>  'Product ' . (empty($id) ? 'added' : 'edited')
-        ];
+        return $discount->getData();
     }
 
-    private function get_expiry_object(&$data)
-    {
-        $expiry =   Expiry::get()->filter(['ExpiryDate' => $data->date])->first();
-        if (empty($expiry)) {
-            $expiry             =   Expiry::create();
-            $expiry->ExpiryDate =   $data->date;
-            $expiry->write();
-        }
-
-        return $expiry;
-    }
-
-    private function cease(&$request)
+    private function update(&$request)
     {
         $id =   $request->param('ID');
-        if ($product = Versioned::get_by_stage(ProductPage::class, 'Stage')->byID($id)) {
-            $product->doUnpublish();
-            return [
-                'message'   =>  'Product ceased'
-            ];
+        if ($discount = Discount::get()->byID($id)) {
+            $discount->Title        =   $request->postVar('label');
+            $discount->DiscountBy   =   $request->postVar('type') == 'by_percentage' ? 'ByPercentage' : 'ByValue';
+            $discount->DiscountRate =   $request->postVar('rate');
+            $discount->write();
+
+            return $discount->getData();
         }
 
         return $this->httpError(404, 'Not found');
     }
 
-    private function publish(&$request)
+    private function delete(&$request)
     {
         $id =   $request->param('ID');
-        if ($product = Versioned::get_by_stage(ProductPage::class, 'Stage')->byID($id)) {
-            $product->publishSingle();
-            return [
-                'message'   =>  'Product published'
-            ];
+        if ($discount = Discount::get()->byID($id)) {
+            if (Order::get()->filter(['DiscountEntryID' => $id])->count() == 0 &&
+                OrderItem::get()->filter(['DiscountID' => $id])->count() == 0) {
+                $discount->delete();
+            } else{
+                $discount->InfiniteUse  =   false;
+                $discount->Used         =   true;
+                $discount->write();
+            }
+
+            return true;
         }
 
         return $this->httpError(404, 'Not found');
