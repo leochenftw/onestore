@@ -34,7 +34,7 @@
     "gulp-sourcemaps": "2.6.3",
     "gulp-uglify": "^3.0.0",
     "hamburgers": "^0.9.3",
-    "handlebars": "^4.0.11",
+    "handlebars": "^4.3.0",
     "html5-boilerplate": "^6.1.0",
     "iframe-resizer": "^3.6.1",
     "imagesloaded": "^4.1.4",
