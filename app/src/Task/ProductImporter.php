@@ -16,6 +16,7 @@ use App\Web\Model\Supplier;
  */
 class ProductImporter extends BuildTask
 {
+    private $landing_page   =   null;
     /**
      * @var bool $enabled If set to FALSE, keep it from showing in the list
      * and from being executable through URL or CLI.
@@ -41,7 +42,11 @@ class ProductImporter extends BuildTask
      */
     public function run($request)
     {
-        return $this->do_import($request);
+        if ($this->landing_page = ProductLandingPage::get()->first()) {
+            return $this->do_import($request);
+        }
+
+        $this->terminate('Please create a product landing page first!');
     }
 
     private function do_import(&$request)
@@ -74,49 +79,46 @@ class ProductImporter extends BuildTask
                 $i  =   0;
                 $n  =   0;
                 foreach ($products as $product) {
-                    Debugger::inspect($product);
-                    // if (!empty($product->manufacturer)) {
-                    //     if ($product->manufacturer == '1') {
-                    //         $n++;
-                    //         Debugger::inspect("\033[01;31mSkipping " . $product->title . "\033[0m.", false);
-                    //         continue;
-                    //     } else {
-                    //         $supplier           =   Supplier::get()->filter(['Title' => $product->manufacturer])->first();
-                    //         if (empty($supplier)) {
-                    //             $supplier   =   Supplier::create();
-                    //         }
-                    //         $supplier->Title    =   $product->manufacturer;
-                    //         $supplier->write();
-                    //     }
-                    // }
-                    //
-                    // $item   =   ProductPage::get()->filter(['Barcode' => $product->barcode])->first();
-                    //
-                    // if (empty($item)) {
-                    //     $item           =   ProductPage::create();
-                    //     $item->Barcode  =   $product->barcode;
-                    //     $item->ParentID =   $this->landing_page->ID;
-                    // }
-                    //
-                    // $item->Title            =   $product->title;
-                    // $item->Alias            =   $product->chinese_title;
-                    // $item->MeasurementUnit  =   $product->measurement;
-                    // $item->StockCount       =   $product->stock_count;
-                    // $item->Cost             =   $product->cost;
-                    // $item->Price            =   $product->price;
-                    // $item->UnitWeight       =   $product->weight;
-                    //
-                    // $item->write();
-                    // $item->writeToStage('Live');
-                    //
-                    // if (!empty($supplier)) {
-                    //     $item->Supplier()->add($supplier->ID);
-                    //     $item->write();
-                    //     $item->writeToStage('Live');
-                    // }
-                    //
-                    // $i++;
-                    // Debugger::inspect("\033[01;31m" . $item->Title . "\033[0m" . ' has been created/updated.', false);
+                    if (strpos($product->Barcode, '+') !== false) {
+                        $n++;
+                        print $product->Barcode;
+                        print PHP_EOL;
+                    } else {
+                        if (!empty($product->Supplier)) {
+                            $supplier   =   Supplier::get()->filter(['Title' => $product->Supplier])->first();
+                            if (empty($supplier)) {
+                                $supplier   =   Supplier::create();
+                            }
+                            $supplier->Title    =   $product->Supplier;
+                            $supplier->write();
+                        }
+
+                        $item   =   ProductPage::get()->filter(['Barcode' => $product->Barcode])->first();
+
+                        if (empty($item)) {
+                            $item           =   ProductPage::create();
+                            $item->Barcode  =   $product->Barcode;
+                            $item->ParentID =   $this->landing_page->ID;
+                        }
+
+                        $item->Title            =   $product->English;
+                        $item->Alias            =   $product->Chinese;
+                        $item->StockCount       =   empty($product->Stock) ? 0 : $product->Stock;
+                        $item->Cost             =   $product->Cost;
+                        $item->Price            =   $product->Price;
+
+                        $item->write();
+                        $item->writeToStage('Live');
+
+                        if (!empty($supplier)) {
+                            $item->Supplier()->add($supplier->ID);
+                            $item->write();
+                            $item->writeToStage('Live');
+                        }
+
+                        $i++;
+                        Debugger::inspect("\033[01;31m" . $item->Title . "\033[0m" . ' has been created/updated.', false);
+                    }
                 }
 
                 Debugger::inspect("\033[01;31m" . $i . " items \033[0m added/created.\n\033[01;31m" . $n . " items \033[0m skipped.", false);
@@ -126,24 +128,14 @@ class ProductImporter extends BuildTask
         print PHP_EOL;
     }
 
-    private function parse_name($name)
+    private function terminate($message)
     {
-        $names  =   explode(' ', trim($name));
-        $fn     =   null;
-        $sn     =   null;
-
-        if (count($names) == 2) {
-            $fn =   $names[0];
-            $sn =   $names[1];
-        } elseif (count($names) == 1) {
-            $fn =   $names[0];
-        } else {
-            $fn =   $name;
-        }
-
-        return [
-            'fn'    =>  $fn,
-            'sn'    =>  $sn
-        ];
+        echo "\033[01;31m\n";
+        print PHP_EOL;
+        print $message;
+        print PHP_EOL;
+        print PHP_EOL;
+        echo "\033[0m";
+        die;
     }
 }
