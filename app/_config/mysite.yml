@@ -39,3 +39,15 @@ SilverStripe\Security\Member:
 SilverStripe\Assets\Image:
   extensions:
     - App\Web\Extension\ImageExtension
+
+Leochenftw\eCommerce\eCollector\Model\Customer:
+  extensions:
+    - App\Web\Extension\CustomerExension
+
+Leochenftw\eCommerce\eCollector\Model\Discount:
+  extensions:
+    - App\Web\Extension\DiscountExtension
+
+Leochenftw\eCommerce\eCollector\Admin\DiscountAdmin:
+  extensions:
+    - App\Web\Extension\DiscountAdminExtension

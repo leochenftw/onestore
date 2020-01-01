@@ -6,7 +6,9 @@ use Leochenftw\Debugger;
 use SilverStripe\Versioned\Versioned;
 use App\Web\Model\Expiry;
 use Leochenftw\eCommerce\eCollector\Model\Order;
+use Leochenftw\eCommerce\eCollector\Model\Customer;
 use Leochenftw\Util;
+use App\Web\Model\UseOfCoupon;
 
 class OrderAPI extends RestfulController
 {
@@ -47,20 +49,46 @@ class OrderAPI extends RestfulController
             $filter['Created:LessThan'] =   strtotime($to . 'T23:59:59');
         }
 
+        if (empty($filter)) {
+            $today                                  =   date('Y-m-d', time());
+            $filter['Created:GreaterThanOrEqual']   =   strtotime($today . 'T00:00:00');
+            $filter['Created:LessThan']             =   strtotime($today . 'T23:59:59');
+        }
+
         $orders =   Order::get();
 
         if (!empty($filter)) {
             $orders =   $orders->filter($filter);
         }
 
-        $count  =   $orders->count();
+        $count      =   $orders->count();
+        $sum        =   $orders->sum('TotalAmount');
+        $split_sum  =   [
+            'eftpos'    =>  $orders->filter(['PaidBy' => 'EFTPOS'])->sum('TotalAmount'),
+            'cash'      =>  $orders->filter(['PaidBy' => 'Cash'])->sum('TotalAmount'),
+            'voucher'   =>  $this->get_voucher_total($filter)
+        ];
         $orders =   $orders->sort([$sort => $by])->limit($this->page_size, $page * $this->page_size);
 
         return [
             'total_page'    =>  ceil($count / $this->page_size),
+            'total_items'   =>  $count,
             'list'          =>  $orders->getListData(),
-            'sum'           =>  $orders->sum('TotalAmount')
+            'sum'           =>  $sum,
+            'split_sum'     =>  $split_sum
         ];
+    }
+
+    private function get_voucher_total(&$filter)
+    {
+        $vouchers   =   UseOfCoupon::get()->filter($filter);
+        $sum        =   0;
+        foreach ($vouchers as $voucher) {
+            if ($voucher->Coupon()->exists()) {
+                $sum    +=  $voucher->Coupon()->AmountWorth;
+            }
+        }
+        return $sum;
     }
 
     public function post($request)
@@ -90,9 +118,55 @@ class OrderAPI extends RestfulController
         return $this->httpError(400, 'Missing action!');
     }
 
+    private function bind_customer(&$request)
+    {
+        if ($id = $request->param('ID')) {
+
+            if ($order = Order::get()->byID($id)) {
+                if ($customer_id = $request->postVar('customer_id')) {
+                    if ($customer = Customer::get()->byID($customer_id)) {
+                        $customer->ShopPoints           +=  $order->TotalAmount;
+                        $customer->write();
+
+                        $order->CustomerID              =   $customer->ID;
+                        $order->PointBalanceSnapshot    =   $customer->ShopPoints;
+                        $order->write();
+
+                        $customer_data                  =   $customer->getData();
+                        $customer_data['shop_points']   =   number_format($order->PointBalanceSnapshot, 0);
+                        return $customer_data;
+                    }
+
+                    return $this->httpError(404, 'Customer not found');
+                }
+            }
+
+            return $this->httpError(404, 'Transaction not found');
+        }
+
+        return $this->httpError(400, 'Missing Transaction ID');
+    }
+
     private function download(&$request)
     {
-        $orders =   Order::get();
+        $filter =   [];
+
+        if ($from = $request->getVar('from')) {
+            $filter['Created:GreaterThanOrEqual']   =   strtotime($from);
+        }
+
+        if ($to = $request->getVar('to')) {
+            $filter['Created:LessThan'] =   strtotime($to . 'T23:59:59');
+        }
+
+        if (empty($filter)) {
+            $today                                  =   date('Y-m-d', time());
+            $filter['Created:GreaterThanOrEqual']   =   strtotime($today . 'T00:00:00');
+            $filter['Created:LessThan']             =   strtotime($today . 'T23:59:59');
+        }
+
+        $orders =   Order::get()->filter($filter)->sort(['ID' => 'DESC']);
+
         $json   =   $this->get_csv_list($orders);
         return Util::jsonToCsv($json, false, true);
     }
@@ -112,5 +186,10 @@ class OrderAPI extends RestfulController
         }
 
         return $data;
+    }
+
+    public function Backoff()
+    {
+        return 'ffs';
     }
 }

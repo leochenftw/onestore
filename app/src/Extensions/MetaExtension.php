@@ -34,7 +34,7 @@ class MetaExtension extends DataExtension
     public function updateCMSFields(FieldList $fields)
     {
         if ($meta = $fields->fieldbyName('Root.Main.Metadata')) {
-            
+
             $fields->insertBefore(TextField::create('ConanicalURL'), 'MetaDescription');
 
             $meta->push(

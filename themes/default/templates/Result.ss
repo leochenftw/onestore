@@ -1,3 +1,4 @@
+<% if $Data %>
 <h2>Request result</h2>
 <% loop $Data %>
     <% if $Heading %>
@@ -9,3 +10,4 @@
         </p>
     <% end_if %>
 <% end_loop %>
+<% end_if %>

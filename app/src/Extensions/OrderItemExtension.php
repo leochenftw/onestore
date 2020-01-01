@@ -12,7 +12,8 @@ class OrderItemExtension extends DataExtension
      * @var array
      */
     private static $db = [
-        'isRefunded'    =>  'Boolean'
+        'CustomUnitPrice'   =>  'Currency',
+        'isRefunded'        =>  'Boolean'
     ];
     /**
      * Has_one relationship
@@ -57,18 +58,24 @@ class OrderItemExtension extends DataExtension
     {
         parent::onBeforeWrite();
 
-        if ($this->owner->Product()->exists()) {
+        if (!empty($this->owner->CustomUnitPrice)) {
+            $this->owner->Subtotal  =   $this->owner->Quantity * $this->owner->CustomUnitPrice;
+        } elseif ($this->owner->Product()->exists()) {
             $this->owner->Subtotal  =   $this->owner->Quantity * $this->owner->Product()->Price;
-            $this->owner->Subweight +=  $this->owner->Quantity * $this->owner->Product()->UnitWeight;
-        } elseif ($this->owner->Membership()->exists()) {
-            $this->owner->Subtotal  =   $this->owner->Quantity * $this->owner->Membership()->Price;
         }
+
+        $this->owner->Subweight +=  $this->owner->Quantity * $this->owner->Product()->UnitWeight;
     }
 
     public function getData()
     {
         if ($this->owner->Product()->exists()) {
             $data               =   $this->owner->Product()->getData();
+
+            if (!empty($this->owner->CustomUnitPrice)) {
+                $data['price'] =   $this->owner->CustomUnitPrice;
+            }
+
             $data['prod_id']    =   $data['id'];
             $data['id']         =   $this->owner->ID;
             $data['quantity']   =   $this->owner->Quantity;
@@ -103,12 +110,10 @@ class OrderItemExtension extends DataExtension
 
     public function UnitPrice()
     {
-        return  $this->owner->Product()->exists() ?
-                '$' . money_format('%i',  $this->owner->Product()->Price) :
-                (
-                    $this->owner->Membership()->exists() ?
-                    '$' . money_format('%i',  $this->owner->Membership()->Price) :
-                    '-'
-                );
+        return  !empty($this->owner->CustomUnitPrice) ?
+                ('$' . money_format('%i',  $this->owner->CustomUnitPrice)) :
+                ($this->owner->Product()->exists() ?
+                '$' . money_format('%i',  $this->owner->Product()->Price) : 'N/A');
+
     }
 }

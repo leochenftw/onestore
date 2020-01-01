@@ -46,7 +46,7 @@ class ProductPage extends Product
         'StockCount'            =>  'Int',
         'Cost'                  =>  'Currency',
         'StockLowWarningPoint'  =>  'Int',
-        'NonDiscountable'       =>  'Boolean'
+        // 'NoDiscount'       =>  'Boolean'
     ];
 
     /**
@@ -74,7 +74,7 @@ class ProductPage extends Product
                 'weight'        =>  $this->UnitWeight,
                 'outofstock'    =>  (Boolean) $this->OutOfStock,
                 'lowpoint'      =>  $this->StockLowWarningPoint,
-                'discountable'  =>  !$this->NonDiscountable,
+                'discountable'  =>  !$this->NoDiscount,
                 'manufacturer'  =>  $this->Manufacturer()->Title,
                 'supplier'      =>  implode(', ', $this->Supplier()->column('Title')),
                 'updated'       =>  $this->LastEdited,
@@ -87,7 +87,7 @@ class ProductPage extends Product
             'id'            =>  $this->ID,
             'title'         =>  $this->Title,
             'price'         =>  $this->Price,
-            'discountable'  =>  !$this->NonDiscountable
+            'discountable'  =>  !$this->NoDiscount
         ];
     }
 
@@ -153,16 +153,7 @@ class ProductPage extends Product
             CurrencyField::create('Cost'),
             'Price'
         );
-
-        $fields->addFieldToTab(
-            'Root.ProductDetails',
-            CheckboxField::create(
-                'NonDiscountable',
-                'Product is not discountable'
-            ),
-            'UnitWeight'
-        );
-
+        
         $fields->addFieldsToTab(
             'Root.ProductDetails',
             [

@@ -11,11 +11,12 @@ use Leochenftw\eCommerce\eCollector\Model\OrderItem;
 class OrderExtension extends DataExtension
 {
     private static $db = [
-        'isStoreOrder'  =>  'Boolean',
-        'PaidBy'        =>  'Enum("Cash,EFTPOS")',
-        'ReceiptNumber' =>  'Varchar(36)',
-        'CashTaken'     =>  'Currency',
-        'ItemCount'     =>  'Int'
+        'isStoreOrder'          =>  'Boolean',
+        'PaidBy'                =>  'Enum("Cash,EFTPOS,Voucher")',
+        'ReceiptNumber'         =>  'Varchar(36)',
+        'CashTaken'             =>  'Currency',
+        'ItemCount'             =>  'Int',
+        'PointBalanceSnapshot'  =>  'Int'
     ];
 
     /**
@@ -108,22 +109,22 @@ class OrderExtension extends DataExtension
         $factor             =   1;
         $nondiscountable    =   0;
 
-        if ($this->owner->DiscountEntry()->exists() && $this->owner->DiscountEntry()->Type == 'byPercentage') {
-            $factor     -=  ($this->owner->DiscountEntry()->Value * 0.01);
+        if ($this->owner->DiscountEntry()->exists() && $this->owner->DiscountEntry()->DiscountBy == 'ByPercentage') {
+            $factor     -=  ($this->owner->DiscountEntry()->DiscountRate * 0.01);
         }
 
         foreach ($this->owner->Items() as $item) {
             $subtotal   =   $item->Subtotal;
 
-            if ($item->Product()->exists() && !$item->Product()->NonDiscountable) {
+            if ($item->Product()->exists() && !$item->Product()->NoDiscount) {
                 $amount +=  ($subtotal * $factor * ($item->isRefunded ? -1 : 1));
             } else {
                 $nondiscountable    +=  $subtotal * ($item->isRefunded ? -1 : 1);
             }
         }
 
-        if ($this->owner->DiscountEntry()->exists() && $this->owner->DiscountEntry()->Type == 'byAmount') {
-            $amount -=  $this->owner->DiscountEntry()->Value;
+        if ($this->owner->DiscountEntry()->exists() && $this->owner->DiscountEntry()->DiscountBy == 'ByValue') {
+            $amount -=  $this->owner->DiscountEntry()->DiscountRate;
             $amount =   $amount < 0 ? 0 : $amount;
         }
 
@@ -133,6 +134,12 @@ class OrderExtension extends DataExtension
 
     public function getData()
     {
+        $customer   =   $this->owner->Customer()->exists() ? $this->owner->Customer()->getData() : null;
+
+        if (!empty($customer)) {
+            $customer['shop_points']    =   number_format($this->owner->PointBalanceSnapshot, 0);
+        }
+
         return [
             'goods'     =>  $this->loop_items(),
             'discount'  =>  $this->owner->DiscountEntry()->exists() ? $this->owner->DiscountEntry()->getData() : null,
@@ -142,7 +149,8 @@ class OrderExtension extends DataExtension
                 'by'        =>  $this->owner->Operator()->exists() ? $this->owner->Operator()->Title : 'Anonymous',
                 'barcode'   =>  'RECEIPT-' . $this->owner->ReceiptNumber,
                 'method'    =>  $this->owner->PaidBy,
-                'cash'      =>  $this->owner->CashTaken
+                'cash'      =>  $this->owner->CashTaken,
+                'customer'  =>  $customer
             ]
         ];
     }

@@ -9,6 +9,7 @@ use App\Web\Layout\ProductPage;
 use SilverStripe\Versioned\Versioned;
 use Leochenftw\eCommerce\eCollector\Model\Discount;
 use App\Web\Layout\ProductLandingPage;
+use App\Web\Model\Coupon;
 
 class DiscountAPI extends RestfulController
 {
@@ -30,8 +31,15 @@ class DiscountAPI extends RestfulController
             return $this->httpError(404, 'Not found');
         }
 
-        $discounts  =   Discount::get()->filter(['Used' => false]);
-        return $discounts->getData();
+        $discounts  =   Discount::get()->filter(['Used' => false, 'isVoucher' => false])->getData();
+        $vouchers   =   Coupon::get()->filter(['Ceased' => false])->getListData();
+
+        $list       =   array_merge($discounts, $vouchers);
+        $date       =   array_column($list, 'created');
+
+        array_multisort($date, SORT_DESC, $list);
+
+        return $list;
     }
 
     public function post($request)

@@ -6,6 +6,11 @@ use Leochenftw\Debugger;
 use SilverStripe\Security\Member;
 use Leochenftw\eCommerce\eCollector\Model\Order;
 use Leochenftw\eCommerce\eCollector\Model\OrderItem;
+use Leochenftw\eCommerce\eCollector\Model\Customer;
+use App\Web\Model\Coupon;
+use App\Web\Model\UseOfCoupon;
+use Leochenftw\eCommerce\eCollector\Model\Discount;
+use App\Web\Layout\ProductPage;
 
 class StoreOrderAPI extends RestfulController
 {
@@ -22,16 +27,26 @@ class StoreOrderAPI extends RestfulController
         if (($list = $request->postVar('list')) && ($by = $request->postVar('by'))) {
             $list       =   json_decode($list);
             $cash_taken =   !empty($request->postVar('cash_taken')) ? $request->postVar('cash_taken') : null;
-            if (!empty($request->postVar('discount'))) {
-                return $this->place_order($list, $by, $cash_taken, $request->postVar('discount'));
+            $customer   =   null;
+            $coupon     =   null;
+
+            if (!empty($request->postVar('customer'))) {
+                $customer_id    =   $request->postVar('customer');
+                $customer       =   Customer::get()->byID($customer_id);
             }
-            return $this->place_order($list, $by, $cash_taken);
+
+            if (!empty($request->postVar('coupon'))) {
+                $coupon_id      =   $request->postVar('coupon');
+                $coupon         =   Coupon::get()->byID($coupon_id);
+            }
+
+            return $this->place_order($list, $by, $cash_taken, $request->postVar('discount'), $customer, $coupon);
         }
 
         return $this->httpError(400, 'Invalid request');
     }
 
-    private function place_order(&$list, $by, $cash_taken = null, $discount = null)
+    private function place_order(&$list, $by, $cash_taken = null, $discount = null, $customer = null, $coupon = null)
     {
         $order                  =   Order::create();
         $order->isStoreOrder    =   true;
@@ -40,8 +55,31 @@ class StoreOrderAPI extends RestfulController
         if (!is_null($cash_taken)) {
             $order->CashTaken   =   $cash_taken;
         }
+
         if (!empty($discount)) {
             $order->DiscountEntryID =   $discount;
+        }
+
+        if (!empty($customer)) {
+            $order->CustomerID  =   $customer->ID;
+
+            if (!empty($coupon)) {
+                $discount                   =   Discount::create();
+                $discount->Title            =   '[CR] ' . $coupon->Title;
+                $discount->DiscountBy       =   'ByValue';
+                $discount->DiscountRate     =   $coupon->AmountWorth;
+                $discount->Type             =   'Coupon';
+                $discount->isVoucher        =   true;
+                $discount->Used             =   true;
+                $discount->write();
+
+                $order->DiscountEntryID     =   $discount->ID;
+
+                $coupon_usage               =   UseOfCoupon::create();
+                $coupon_usage->CustomerID   =   $customer->ID;
+                $coupon_usage->CouponID     =   $coupon->ID;
+                $coupon_usage->write();
+            }
         }
 
         $order->write();
@@ -49,6 +87,13 @@ class StoreOrderAPI extends RestfulController
         foreach ($list as $item) {
             $order_item             =   OrderItem::create();
             $order_item->ProductID  =   $item->id;
+
+            if ($product = ProductPage::get()->byID($item->id)) {
+                if ($product->Price != $item->unit_price) {
+                    $order_item->CustomUnitPrice    =   $item->unit_price;
+                }
+            }
+
             $order_item->Quantity   =   $item->quantity;
             $order_item->isRefunded =   $item->refund;
             $order_item->OrderID    =   $order->ID;
@@ -57,11 +102,21 @@ class StoreOrderAPI extends RestfulController
 
         $order->sum_total_amount();
 
-        return [
-            'at'        =>  $order->LastEdited,
-            'by'        =>  $order->Operator()->exists() ? $order->Operator()->Title : 'Anonymous',
-            'barcode'   =>  'RECEIPT-' . $order->ReceiptNumber,
-            'cash'      =>  $order->CashTaken
-        ];
+        if (!empty($customer)) {
+
+            if (empty($coupon)) {
+                $customer->ShopPoints   +=  $order->TotalAmount;
+            } else {
+                $customer->ShopPoints   -=  $coupon->Points;
+            }
+
+            $customer->write();
+            $order->PointBalanceSnapshot    =   $customer->ShopPoints;
+            $order->write();
+        }
+
+        $receipt    =   $order->getData();
+
+        return $receipt['order'];
     }
 }

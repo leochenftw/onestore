@@ -6,6 +6,8 @@ use Leochenftw\Debugger;
 use Leochenftw\eCommerce\eCollector\Model\Discount;
 use App\Web\Layout\ProductPage;
 use Leochenftw\eCommerce\eCollector\Model\Order;
+use Leochenftw\eCommerce\eCollector\Model\Customer;
+use App\Web\Model\Coupon;
 
 class LookupAPI extends RestfulController
 {
@@ -22,7 +24,7 @@ class LookupAPI extends RestfulController
         $lookup =   $request->postVar('input');
         if (strpos($lookup, 'DCNT-') === 0) {
             $lookup =   str_replace('DCNT-', '', $lookup);
-            if ($discount = Discount::get()->filter(['CouponCode' => $lookup])->first()) {
+            if ($discount = Discount::get()->filter(['CouponCode' => $lookup, 'isVoucher' => false])->first()) {
                 return [
                     'type'  =>  'discount',
                     'data'  =>  $discount->getData()
@@ -38,6 +40,15 @@ class LookupAPI extends RestfulController
                     'data'  =>  $order->getData()
                 ];
             }
+        } elseif (strpos($lookup, 'CUSTOMER-') === 0) {
+            $lookup =   str_replace('CUSTOMER-', '', $lookup);
+            if ($customer = Customer::get()->filter(['PhoneNumber' => $lookup])->first()) {
+                return [
+                    'customer'          =>  $customer->getData(),
+                    'available_coupons' =>  Coupon::getAvailableCoupons($customer)
+                ];
+            }
+            return $this->httpError(404, 'No matched customer');
         } elseif ($product = ProductPage::get()->filter(['Barcode' => $lookup])->first()) {
             return [
                 'type'  =>  'product',

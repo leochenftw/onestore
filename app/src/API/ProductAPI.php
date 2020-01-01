@@ -121,7 +121,7 @@ class ProductAPI extends RestfulController
         $product->UnitWeight            =   $request->postVar('weight');
         $product->OutOfStock            =   $request->postVar('outofstock');
         $product->StockLowWarningPoint  =   $request->postVar('lowpoint');
-        $product->NonDiscountable       =   $request->postVar('discountable') == 'true' ? 0 : 1;
+        $product->NoDiscount            =   $request->postVar('discountable') == 'true' ? 0 : 1;
 
         if ($parent = ProductLandingPage::get()->first()) {
             $product->ParentID  =   $parent->ID;
