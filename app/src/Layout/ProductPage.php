@@ -43,10 +43,10 @@ class ProductPage extends Product
         'Barcode'               =>  'Varchar(128)',
         'Alias'                 =>  'Varchar(64)',
         'MeasurementUnit'       =>  'Varchar(8)',
-        'StockCount'            =>  'Int',
+        'StockCount'            =>  'Decimal',
         'Cost'                  =>  'Currency',
-        'StockLowWarningPoint'  =>  'Int',
-        // 'NoDiscount'       =>  'Boolean'
+        'StockLowWarningPoint'  =>  'Decimal',
+        'ContributeNoPoint'     =>  'Boolean'
     ];
 
     /**
@@ -75,6 +75,7 @@ class ProductPage extends Product
                 'outofstock'    =>  (Boolean) $this->OutOfStock,
                 'lowpoint'      =>  $this->StockLowWarningPoint,
                 'discountable'  =>  !$this->NoDiscount,
+                'no_point'      =>  $this->ContributeNoPoint,
                 'manufacturer'  =>  $this->Manufacturer()->Title,
                 'supplier'      =>  implode(', ', $this->Supplier()->column('Title')),
                 'updated'       =>  $this->LastEdited,
@@ -87,7 +88,8 @@ class ProductPage extends Product
             'id'            =>  $this->ID,
             'title'         =>  $this->Title,
             'price'         =>  $this->Price,
-            'discountable'  =>  !$this->NoDiscount
+            'discountable'  =>  !$this->NoDiscount,
+            'no_point'      =>  $this->ContributeNoPoint
         ];
     }
 
@@ -153,7 +155,7 @@ class ProductPage extends Product
             CurrencyField::create('Cost'),
             'Price'
         );
-        
+
         $fields->addFieldsToTab(
             'Root.ProductDetails',
             [

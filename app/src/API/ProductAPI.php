@@ -56,19 +56,18 @@ class ProductAPI extends RestfulController
         $data   =   [];
         foreach ($products as $product) {
             $data[] =   [
-                'Barcode'       =>  $product->Barcode,
-                'English'       =>  $product->Title,
-                'Chinese'       =>  $product->Alias,
-                'Cost'          =>  $product->Cost,
-                'Price'         =>  $product->Price,
-                'Stock'         =>  $product->StockCount,
+                'Barcode'       =>  Util::null_it($product->Barcode),
+                'English'       =>  Util::null_it($product->Title),
+                'Chinese'       =>  Util::null_it($product->Alias),
+                'Cost'          =>  Util::null_it($product->Cost),
+                'Price'         =>  Util::null_it($product->Price),
+                'Stock'         =>  Util::null_it($product->StockCount),
                 'Supplier'      =>  implode(', ', $product->Supplier()->column('Title')),
                 'Ceased'        =>  !$product->isPublished()
             ];
         }
         return $data;
     }
-
 
     private function get_list(&$products)
     {
@@ -111,23 +110,24 @@ class ProductAPI extends RestfulController
         $id         =   $request->param('ID');
         $product    =   empty($id) ? ProductPage::create() : Versioned::get_by_stage(ProductPage::class, 'Stage')->byID($id);
 
-        $product->Barcode               =   $request->postVar('barcode');
-        $product->Title                 =   $request->postVar('title');
-        $product->Alias                 =   $request->postVar('alias');
-        $product->MeasurementUnit       =   $request->postVar('unit');
-        $product->StockCount            =   $request->postVar('stockcount');
-        $product->Cost                  =   $request->postVar('cost');
-        $product->Price                 =   $request->postVar('price');
-        $product->UnitWeight            =   $request->postVar('weight');
-        $product->OutOfStock            =   $request->postVar('outofstock');
-        $product->StockLowWarningPoint  =   $request->postVar('lowpoint');
-        $product->NoDiscount            =   $request->postVar('discountable') == 'true' ? 0 : 1;
+        $product->Barcode               =   Util::null_it($request->postVar('barcode'));
+        $product->Title                 =   Util::null_it($request->postVar('title'));
+        $product->Alias                 =   Util::null_it($request->postVar('alias'));
+        $product->MeasurementUnit       =   Util::null_it($request->postVar('unit'));
+        $product->StockCount            =   Util::null_it($request->postVar('stockcount'));
+        $product->Cost                  =   Util::null_it($request->postVar('cost'));
+        $product->Price                 =   Util::null_it($request->postVar('price'));
+        $product->UnitWeight            =   Util::null_it($request->postVar('weight'));
+        $product->OutOfStock            =   Util::null_it($request->postVar('outofstock'));
+        $product->StockLowWarningPoint  =   Util::null_it($request->postVar('lowpoint'));
+        $product->NoDiscount            =   !Util::null_it($request->postVar('discountable'));
+        $product->ContributeNoPoint     =   Util::null_it($request->postVar('no_point'));
 
         if ($parent = ProductLandingPage::get()->first()) {
             $product->ParentID  =   $parent->ID;
         }
 
-        if ($manufacturer_title = trim($request->postVar('manufacturer'))) {
+        if ($manufacturer_title = Util::null_it(trim($request->postVar('manufacturer')))) {
             $manufacturer   =   Manufacturer::get()->filter(['Title' => $manufacturer_title])->first();
 
             if (empty($manufacturer)) {

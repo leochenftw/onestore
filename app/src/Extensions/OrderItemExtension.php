@@ -32,7 +32,8 @@ class OrderItemExtension extends DataExtension
         'isRefundedItem'    =>  'is refunded Item',
         'UnitPrice'         =>  'Unit Price',
         'Quantity'          =>  'Quantity',
-        'Subtotal'          =>  'Subtotal'
+        'Subtotal'          =>  'Subtotal',
+        'PointsWorth'       =>  'Decimal'
     ];
 
     public function makeTitle()
@@ -64,6 +65,10 @@ class OrderItemExtension extends DataExtension
             $this->owner->Subtotal  =   $this->owner->Quantity * $this->owner->Product()->Price;
         }
 
+        if ($this->owner->Product()->exists() && !$this->owner->Product()->ContributeNoPoint) {
+            $this->owner->PointsWorth   =   $this->owner->Subtotal;
+        }
+
         $this->owner->Subweight +=  $this->owner->Quantity * $this->owner->Product()->UnitWeight;
     }
 
@@ -78,7 +83,7 @@ class OrderItemExtension extends DataExtension
 
             $data['prod_id']    =   $data['id'];
             $data['id']         =   $this->owner->ID;
-            $data['quantity']   =   $this->owner->Quantity;
+            $data['quantity']   =   round($this->owner->Quantity * 100) * 0.01;
             $data['refund']     =   $this->owner->isRefunded;
             return $data;
         }

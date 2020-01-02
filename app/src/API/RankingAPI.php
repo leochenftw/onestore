@@ -60,13 +60,29 @@ class RankingAPI extends RestfulController
             $orderitems =   $orderitems->filter($filters);
         }
 
-        $count      =   $orderitems->count();
+        $list       =   [];
 
-        $orderitems =   $orderitems->sort([$sort => $by]);
+        if ($sort == 'Quantity') {
+            $list       =   $this->get_list($orderitems);
+            $count      =   count($list);
+            $qty        =   array_column($list, 'quantity');
+            array_multisort($qty, ($by == 'ASC' ? SORT_ASC : SORT_DESC), $list);
+            $list       =   array_slice($list, $page * $this->page_size, $this->page_size);
+        } elseif ($sort == 'Subtotal') {
+            $list       =   $this->get_list($orderitems);
+            $count      =   count($list);
+            $amount     =   array_column($list, 'amount');
+            array_multisort($amount, ($by == 'ASC' ? SORT_ASC : SORT_DESC), $list);
+            $list       =   array_slice($list, $page * $this->page_size, $this->page_size);
+        } else {
+            $orderitems =   $orderitems->sort([$sort => $by]);
+            $list       =   $this->get_list($orderitems);
+            $count      =   count($list);
+        }
 
         return [
             'total_page'    =>  ceil($count / $this->page_size),
-            'list'          =>  $this->get_list($orderitems)
+            'list'          =>  $list
         ];
     }
 

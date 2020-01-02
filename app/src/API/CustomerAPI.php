@@ -4,6 +4,7 @@ namespace Leochenftw\API;
 use Leochenftw\Restful\RestfulController;
 use Leochenftw\Debugger;
 use Leochenftw\eCommerce\eCollector\Model\Customer;
+use Leochenftw\Util;
 
 class CustomerAPI extends RestfulController
 {
@@ -72,6 +73,7 @@ class CustomerAPI extends RestfulController
         $phone      =   $request->postVar('phone');
         $email      =   $request->postVar('email');
         $fn         =   $request->postVar('firstname');
+        $wechat     =   Util::null_it($request->postVar('wechat'));
 
         if (empty($fn)) {
             return $this->httpError(400, 'Missing first name');
@@ -97,6 +99,7 @@ class CustomerAPI extends RestfulController
 
             $customer->Email        =   $email;
             $customer->PhoneNumber  =   $phone;
+            $customer->Wechat       =   $wechat;
 
             $customer->write();
 
@@ -140,7 +143,7 @@ class CustomerAPI extends RestfulController
             }
 
             $member->PhoneNumber    =   $request->postVar('phone');
-
+            $member->Wechat         =   $request->postVar('wechat');
             $member->write();
 
             return $member->getData();

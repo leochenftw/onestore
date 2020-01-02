@@ -76,8 +76,16 @@ class ProductImporter extends BuildTask
                 $str        =   file_get_contents($json_file);
                 $products   =   json_decode($str);
 
+                $duplicates =   $this->duplicate_barcodes($products);
+
+                if (!empty($duplicates) && empty($args[1])) {
+                    Debugger::inspect($duplicates, false);
+                    return $this->terminate('You have duplicated barcodes in your data');
+                }
+
                 $i  =   0;
                 $n  =   0;
+
                 foreach ($products as $product) {
                     if (strpos($product->Barcode, '+') !== false) {
                         $n++;
@@ -117,7 +125,8 @@ class ProductImporter extends BuildTask
                         }
 
                         $i++;
-                        Debugger::inspect("\033[01;31m" . $item->Title . "\033[0m" . ' has been created/updated.', false);
+                        print "\033[01;31m" . $item->Title . "\033[0m" . ' has been created/updated.';
+                        print PHP_EOL;
                     }
                 }
 
@@ -126,6 +135,32 @@ class ProductImporter extends BuildTask
         }
 
         print PHP_EOL;
+    }
+
+    private function duplicate_barcodes(&$products)
+    {
+        $barcodes       =   [];
+        foreach ($products as $product)
+        {
+            if (strpos($product->Barcode, '+') !== false) {
+                $n++;
+                return $this->terminate('Barcode contains "+" sign: ' . $product->Barcode);
+            }
+
+            if (empty($barcodes[$product->Barcode])) {
+                $barcodes[$product->Barcode]    =   1;
+            } else {
+                $barcodes[$product->Barcode]++;
+            }
+        }
+
+        foreach ($barcodes as $key => $value) {
+            if ($value <= 1) {
+                unset($barcodes[$key]);
+            }
+        }
+
+        return $barcodes;
     }
 
     private function terminate($message)

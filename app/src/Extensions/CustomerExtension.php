@@ -13,7 +13,8 @@ class CustomerExension extends DataExtension
     private static $db = [
         'Suspended'     =>  'Boolean',
         'PhoneNumber'   =>  'Varchar(48)',
-        'ShopPoints'    =>  'Decimal'
+        'ShopPoints'    =>  'Decimal',
+        'Wechat'        =>  'Varchar(128)'
     ];
 
     private static $indexes = [
@@ -37,6 +38,7 @@ class CustomerExension extends DataExtension
             'first_name'    =>  $this->owner->FirstName,
             'surname'       =>  $this->owner->Surname,
             'phone'         =>  $this->owner->PhoneNumber,
+            'wechat'        =>  $this->owner->Wechat,
             'email'         =>  $this->sanitised_email(),
             'shop_points'   =>  floor($this->owner->ShopPoints),
             'date_joined'   =>  $this->owner->Created

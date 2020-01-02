@@ -86,7 +86,7 @@ class OrderExtension extends DataExtension
             $n += $item->Quantity;
         }
 
-        return $n;
+        return round($n * 100) * 0.01;
     }
 
     public function add_to_cart($product_id, $qty)
