@@ -39,6 +39,7 @@ class OrderAPI extends RestfulController
         $page   =   !empty($request->getVar('page')) ? $request->getVar('page') : 0;
         $sort   =   !empty($request->getVar('sort')) ? $request->getVar('sort') : 'Created';
         $by     =   !empty($request->getVar('by')) ? $request->getVar('by') : 'DESC';
+
         $filter =   [];
 
         if ($from = $request->getVar('from')) {
@@ -53,6 +54,10 @@ class OrderAPI extends RestfulController
             $today                                  =   date('Y-m-d', time());
             $filter['Created:GreaterThanOrEqual']   =   strtotime($today . 'T00:00:00');
             $filter['Created:LessThan']             =   strtotime($today . 'T23:59:59');
+        }
+
+        if (!empty($request->getVar('discount_only'))) {
+            $filter['DiscountEntryID:not']  =   0;
         }
 
         $orders =   Order::get();
@@ -79,8 +84,9 @@ class OrderAPI extends RestfulController
         ];
     }
 
-    private function get_voucher_total(&$filter)
+    private function get_voucher_total($filter)
     {
+        unset($filter['DiscountEntryID:not']);
         $vouchers   =   UseOfCoupon::get()->filter($filter);
         $sum        =   0;
         foreach ($vouchers as $voucher) {

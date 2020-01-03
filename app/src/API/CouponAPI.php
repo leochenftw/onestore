@@ -27,7 +27,7 @@ class CouponAPI extends RestfulController
             return $this->httpError(404, 'Not found');
         }
 
-        return Coupon::get()->getData();;
+        return Coupon::get()->getData();
     }
 
     public function post($request)

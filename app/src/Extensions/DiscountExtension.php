@@ -3,6 +3,7 @@
 namespace App\Web\Extension;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\DataExtension;
+use Leochenftw\eCommerce\eCollector\Model\Order;
 
 class DiscountExtension extends DataExtension
 {
@@ -12,6 +13,14 @@ class DiscountExtension extends DataExtension
      */
     private static $db = [
         'isVoucher' =>  'Boolean'
+    ];
+
+    /**
+     * Has_many relationship
+     * @var array
+     */
+    private static $has_many = [
+        'Orders'    =>  Order::class
     ];
 
     /**

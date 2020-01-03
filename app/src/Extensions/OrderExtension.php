@@ -85,8 +85,8 @@ class OrderExtension extends DataExtension
         foreach ($this->owner->Items() as $item) {
             $n += $item->Quantity;
         }
-
-        return round($n * 100) * 0.01;
+        $n  =   round($n * 100) * 0.01;
+        return $n == ((int) $n) ? $n : number_format($n, 2);
     }
 
     public function add_to_cart($product_id, $qty)
@@ -164,6 +164,8 @@ class OrderExtension extends DataExtension
             'amount'            =>  $this->owner->TotalAmount,
             'item_count'        =>  $this->getTotalItems(),
             'payment_method'    =>  $this->owner->PaidBy,
+            'discount'          =>  $this->owner->DiscountEntry()->exists() ? $this->owner->DiscountEntry()->Title : null,
+            'customer'          =>  $this->owner->Customer()->exists() ? $this->owner->Customer()->Title : null,
             'by'                =>  $this->owner->Operator()->exists() ? $this->owner->Operator()->Title : 'Anonymous'
         ];
     }
