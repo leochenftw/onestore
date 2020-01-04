@@ -44,6 +44,8 @@ class ProductAPI extends RestfulController
         if ($supplier_id = $request->getVar('supplier')) {
             if ($supplier = Supplier::get()->byID($supplier_id)) {
                 $products   =   $supplier->Products();
+                $sort       =   'StockCount';
+                $by         =   'ASC';
             } else {
                 return $this->httpError(404, 'No such supplier');
             }
