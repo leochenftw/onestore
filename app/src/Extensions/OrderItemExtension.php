@@ -81,9 +81,12 @@ class OrderItemExtension extends DataExtension
                 $data['price'] =   $this->owner->CustomUnitPrice;
             }
 
+            $n  =   round($this->owner->Quantity * 100) * 0.01;
+            $n  =   $n == ((int) $n) ? $n : number_format($n, 2);
+
             $data['prod_id']    =   $data['id'];
             $data['id']         =   $this->owner->ID;
-            $data['quantity']   =   round($this->owner->Quantity * 100) * 0.01;
+            $data['quantity']   =   $n;
             $data['refund']     =   $this->owner->isRefunded;
             return $data;
         }

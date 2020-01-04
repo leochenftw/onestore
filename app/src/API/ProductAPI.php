@@ -41,7 +41,16 @@ class ProductAPI extends RestfulController
         $sort       =   !empty($request->getVar('sort')) ? $request->getVar('sort') : 'Title';
         $by         =   !empty($request->getVar('by')) ? $request->getVar('by') : 'ASC';
 
-        $products   =   ProductPage::get();
+        if ($supplier_id = $request->getVar('supplier')) {
+            if ($supplier = Supplier::get()->byID($supplier_id)) {
+                $products   =   $supplier->Products();
+            } else {
+                return $this->httpError(404, 'No such supplier');
+            }
+        } else {
+            $products   =   ProductPage::get();
+        }
+
         $count      =   $products->count();
         $products   =   $products->sort([$sort => $by])->limit($this->page_size, $page * $this->page_size);
 
