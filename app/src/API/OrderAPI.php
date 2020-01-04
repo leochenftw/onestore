@@ -40,6 +40,30 @@ class OrderAPI extends RestfulController
         $sort   =   !empty($request->getVar('sort')) ? $request->getVar('sort') : 'Created';
         $by     =   !empty($request->getVar('by')) ? $request->getVar('by') : 'DESC';
 
+        if ($customer_id = $request->getVar('customer')) {
+            if ($customer = Customer::get()->byID($customer_id)) {
+                $orders     =   $customer->Orders();
+                $count      =   $orders->count();
+                $sum        =   $orders->sum('TotalAmount');
+                $split_sum  =   [
+                    'eftpos'    =>  $orders->filter(['PaidBy' => 'EFTPOS'])->sum('TotalAmount'),
+                    'cash'      =>  $orders->filter(['PaidBy' => 'Cash'])->sum('TotalAmount'),
+                    'voucher'   =>  $this->get_voucher_total(['CustomerID' => $customer_id])
+                ];
+                $orders     =   $orders->sort([$sort => $by])->limit($this->page_size, $page * $this->page_size);
+
+                return [
+                    'total_page'    =>  ceil($count / $this->page_size),
+                    'total_items'   =>  $count,
+                    'list'          =>  $orders->getListData(),
+                    'sum'           =>  $sum,
+                    'split_sum'     =>  $split_sum
+                ];
+            }
+
+            return $this->httpError(404, 'Not such customer');
+        }
+
         $filter =   [];
 
         if ($from = $request->getVar('from')) {
@@ -73,6 +97,7 @@ class OrderAPI extends RestfulController
             'cash'      =>  $orders->filter(['PaidBy' => 'Cash'])->sum('TotalAmount'),
             'voucher'   =>  $this->get_voucher_total($filter)
         ];
+
         $orders =   $orders->sort([$sort => $by])->limit($this->page_size, $page * $this->page_size);
 
         return [
