@@ -125,7 +125,7 @@ class OrderExtension extends DataExtension
                 $points +=  $subpoints * $factor;
             } else {
                 $nondiscountable    +=  $subtotal * ($item->isRefunded ? -1 : 1);
-                $points             +=  $subpoints;
+                $nondispoints       +=  $subpoints;
             }
         }
 
@@ -134,6 +134,14 @@ class OrderExtension extends DataExtension
             $amount =   $amount < 0 ? 0 : $amount;
             $points -=  $this->owner->DiscountEntry()->DiscountRate;
         }
+
+        if ($this->owner->DiscountEntry()->exists() && $this->owner->DiscountEntry()->isVoucher) {
+            $points =   0;
+        } elseif ($points < 0) {
+            $points =   0;
+        }
+
+        $points +=  $nondispoints;
 
         $this->owner->TotalAmount   =   $amount + $nondiscountable;
         $this->owner->PointsWorth   =   $points;
