@@ -25,6 +25,21 @@ class MemberExension extends DataExtension implements ScaffoldingProvider
         ];
     }
 
+    /**
+     * Event handler called before writing to the database.
+     */
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+        if (!empty($this->owner->FirstName)) {
+            $this->owner->FirstName =   ucfirst($this->owner->FirstName);
+        }
+
+        if (!empty($this->owner->Surname)) {
+            $this->owner->Surname   =   ucfirst($this->owner->Surname);
+        }
+    }
+
     public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
     {
         // $scaffolder->mutation('login', Member::class)
