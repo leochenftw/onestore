@@ -67,7 +67,7 @@ class OrderAPI extends RestfulController
         $filter =   [];
 
         if ($from = $request->getVar('from')) {
-            $filter['Created:GreaterThanOrEqual']   =   strtotime($from);
+            $filter['Created:GreaterThanOrEqual']   =   strtotime($from . 'T00:00:00');
         }
 
         if ($to = $request->getVar('to')) {
