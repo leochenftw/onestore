@@ -13,7 +13,8 @@ class OrderItemExtension extends DataExtension
      */
     private static $db = [
         'CustomUnitPrice'   =>  'Currency',
-        'isRefunded'        =>  'Boolean'
+        'isRefunded'        =>  'Boolean',
+        'PointsWorth'       =>  'Decimal'
     ];
     /**
      * Has_one relationship
@@ -32,8 +33,7 @@ class OrderItemExtension extends DataExtension
         'isRefundedItem'    =>  'is refunded Item',
         'UnitPrice'         =>  'Unit Price',
         'Quantity'          =>  'Quantity',
-        'Subtotal'          =>  'Subtotal',
-        'PointsWorth'       =>  'Decimal'
+        'Subtotal'          =>  'Subtotal'
     ];
 
     public function makeTitle()
@@ -66,7 +66,7 @@ class OrderItemExtension extends DataExtension
         }
 
         if ($this->owner->Product()->exists() && !$this->owner->Product()->ContributeNoPoint) {
-            $this->owner->PointsWorth   =   $this->owner->Subtotal;
+            $this->owner->PointsWorth   =   $this->owner->Subtotal * ($this->owner->isRefunded ? -1 : 1);
         }
 
         $this->owner->Subweight +=  $this->owner->Quantity * $this->owner->Product()->UnitWeight;

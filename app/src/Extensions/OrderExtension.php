@@ -16,7 +16,8 @@ class OrderExtension extends DataExtension
         'ReceiptNumber'         =>  'Varchar(36)',
         'CashTaken'             =>  'Currency',
         'ItemCount'             =>  'Int',
-        'PointBalanceSnapshot'  =>  'Int'
+        'PointBalanceSnapshot'  =>  'Int',
+        'PointsWorth'           =>  'Decimal'
     ];
 
     /**
@@ -108,6 +109,8 @@ class OrderExtension extends DataExtension
         $amount             =   0;
         $factor             =   1;
         $nondiscountable    =   0;
+        $points             =   0;
+        $nondispoints       =   0;
 
         if ($this->owner->DiscountEntry()->exists() && $this->owner->DiscountEntry()->DiscountBy == 'ByPercentage') {
             $factor     -=  ($this->owner->DiscountEntry()->DiscountRate * 0.01);
@@ -115,20 +118,25 @@ class OrderExtension extends DataExtension
 
         foreach ($this->owner->Items() as $item) {
             $subtotal   =   $item->Subtotal;
+            $subpoints  =   $item->PointsWorth;
 
             if ($item->Product()->exists() && !$item->Product()->NoDiscount) {
                 $amount +=  ($subtotal * $factor * ($item->isRefunded ? -1 : 1));
+                $points +=  $subpoints * $factor;
             } else {
                 $nondiscountable    +=  $subtotal * ($item->isRefunded ? -1 : 1);
+                $points             +=  $subpoints;
             }
         }
 
         if ($this->owner->DiscountEntry()->exists() && $this->owner->DiscountEntry()->DiscountBy == 'ByValue') {
             $amount -=  $this->owner->DiscountEntry()->DiscountRate;
             $amount =   $amount < 0 ? 0 : $amount;
+            $points -=  $this->owner->DiscountEntry()->DiscountRate;
         }
 
-        $this->owner->TotalAmount  =   $amount + $nondiscountable;
+        $this->owner->TotalAmount   =   $amount + $nondiscountable;
+        $this->owner->PointsWorth   =   $points;
         $this->owner->write();
     }
 
@@ -144,13 +152,14 @@ class OrderExtension extends DataExtension
             'goods'     =>  $this->loop_items(),
             'discount'  =>  $this->owner->DiscountEntry()->exists() ? $this->owner->DiscountEntry()->getData() : null,
             'order'     =>  [
-                'amount'    =>  $this->owner->TotalAmount,
-                'at'        =>  $this->owner->LastEdited,
-                'by'        =>  $this->owner->Operator()->exists() ? $this->owner->Operator()->Title : 'Anonymous',
-                'barcode'   =>  'RECEIPT-' . $this->owner->ReceiptNumber,
-                'method'    =>  $this->owner->PaidBy,
-                'cash'      =>  $this->owner->CashTaken,
-                'customer'  =>  $customer
+                'amount'        =>  $this->owner->TotalAmount,
+                'at'            =>  $this->owner->LastEdited,
+                'by'            =>  $this->owner->Operator()->exists() ? $this->owner->Operator()->Title : 'Anonymous',
+                'barcode'       =>  'RECEIPT-' . $this->owner->ReceiptNumber,
+                'method'        =>  $this->owner->PaidBy,
+                'cash'          =>  $this->owner->CashTaken,
+                'shop_points'   =>  $this->owner->PointsWorth,
+                'customer'      =>  $customer
             ]
         ];
     }

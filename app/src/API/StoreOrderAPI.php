@@ -105,7 +105,7 @@ class StoreOrderAPI extends RestfulController
         if (!empty($customer)) {
 
             if (empty($coupon)) {
-                $customer->ShopPoints   +=  $order->TotalAmount;
+                $customer->ShopPoints   +=  $order->PointsWorth;
             } else {
                 $customer->ShopPoints   -=  $coupon->Points;
             }
