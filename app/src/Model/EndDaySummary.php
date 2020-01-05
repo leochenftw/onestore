@@ -29,6 +29,18 @@ class EndDaySummary extends DataObject
         'Cash'      =>  'Currency'
     ];
 
+    private static $indexes =   [
+        'Date'  =>  [
+            'type'  =>  'unique'
+        ]
+    ];
+
+    /**
+     * Default sort ordering
+     * @var array
+     */
+    private static $default_sort = ['Date' => 'DESC'];
+
     /**
      * Defines summary fields commonly used in table columns
      * as a quick overview of the data for this dataobject
@@ -88,5 +100,32 @@ class EndDaySummary extends DataObject
         $sum->Cash      =   $cash;
 
         return $sum->write();
+    }
+
+    public static function cumulate($amount, $type, $date = null)
+    {
+        $date       =   empty($date) ? date('Y-m-d', time()) : $date;
+        $summary    =   EndDaySummary::get()->filter(['Date' => $date])->first();
+        
+        if (empty($summary)) {
+            $summary        =   EndDaySummary::create();
+            $summary->Date  =   $date;
+        }
+
+        if ($summary->hasField($type)) {
+            $summary->$type +=   $amount;
+        }
+
+        return $summary->write();
+    }
+
+    public function getData()
+    {
+        return [
+            'date'      =>  $this->Date,
+            'total'     =>  $this->Total,
+            'eftpos'    =>  $this->EFTPOS,
+            'cash'      =>  $this->Cash
+        ];
     }
 }

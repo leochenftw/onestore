@@ -5,6 +5,7 @@ use SilverStripe\Dev\BuildTask;
 use Leochenftw\Debugger;
 use App\Web\Model\EndDaySummary;
 use Leochenftw\eCommerce\eCollector\Model\Order;
+use GuzzleHttp\Client;
 
 /**
  * Description
@@ -42,6 +43,13 @@ class SummariseDaily extends BuildTask
         if (!empty($request->getVar('args'))) {
             $args   =   $request->getVar('args');
             if ($args[0] == 'remote') {
+
+                $list   =   EndDaySummary::get()->filter(['Date:LessThan' => '2020-01-01']);
+                foreach ($list as $item) {
+                    print 'Deleting ' . $item->Date . '...' . PHP_EOL;
+                    $item->delete();
+                }
+
                 return $this->import_remote();
             } elseif ($args[0] == 'purge') {
                 $list   =   EndDaySummary::get();
@@ -92,9 +100,53 @@ class SummariseDaily extends BuildTask
         return EndDaySummary::generate_by_date($date);
     }
 
+    private function fetch_products($page = 0)
+    {
+        $client = new Client([
+            'base_uri' => 'https://www.nzyogo.co.nz/api/v/1/'
+        ]);
+
+        $response = $client->request(
+            'GET',
+            'summary',
+            [
+                'query' =>  [
+                    'page'  =>  $page
+                ]
+            ]
+        );
+
+        $data   =   json_decode($response->getBody());
+
+        return $data;
+    }
+
     private function import_remote()
     {
+        $n      =   0;
+        $list   =   $this->fetch_products($n);
+
+        $this->do_list($list);
+
+        while (!empty($list)) {
+            $n++;
+            $list   =   $this->fetch_products($n);
+            $this->do_list($list);
+        }
+
+        print PHP_EOL;
+        print 'Legacy Imported';
+        print PHP_EOL;
 
         return true;
+    }
+
+    private function do_list(&$list)
+    {
+        foreach ($list as $item) {
+            EndDaySummary::cumulate($item->amount, $item->method, $item->date);
+            print $item->date . ': $' . $item->amount . ', by ' . $item->method;
+            print PHP_EOL;
+        }
     }
 }
