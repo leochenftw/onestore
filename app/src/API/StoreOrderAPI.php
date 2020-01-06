@@ -11,6 +11,7 @@ use App\Web\Model\Coupon;
 use App\Web\Model\UseOfCoupon;
 use Leochenftw\eCommerce\eCollector\Model\Discount;
 use App\Web\Layout\ProductPage;
+use App\Web\Model\EndDaySummary;
 
 class StoreOrderAPI extends RestfulController
 {
@@ -114,6 +115,8 @@ class StoreOrderAPI extends RestfulController
             $order->PointBalanceSnapshot    =   $customer->ShopPoints;
             $order->write();
         }
+
+        EndDaySummary::cumulate($order->TotalAmount, $order->PaidBy, date('Y-m-d', strtotime($order->Created)));
 
         $receipt    =   $order->getData();
 

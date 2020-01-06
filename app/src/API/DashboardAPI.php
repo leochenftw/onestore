@@ -11,6 +11,7 @@ use App\Web\Model\Coupon;
 use App\Web\Model\UseOfCoupon;
 use App\Web\Model\Supplier;
 use SilverStripe\Versioned\Versioned;
+use App\Web\Model\EndDaySummary;
 
 class DashboardAPI extends RestfulController
 {
@@ -34,7 +35,8 @@ class DashboardAPI extends RestfulController
             'sums'          =>  $this->get_today_sums(),
             'products'      =>  $this->get_num_products(),
             'suppliers'     =>  $this->get_num_active_suppliers(),
-            'members'       =>  $this->get_num_customers()
+            'members'       =>  $this->get_num_customers(),
+            'summaries'     =>  $this->get_summaries()
         ];
     }
 
@@ -101,5 +103,12 @@ class DashboardAPI extends RestfulController
             }
         }
         return $sum;
+    }
+
+    private function get_summaries()
+    {
+        $summaries  =   EndDaySummary::get()->filter(['Date:LessThan' => date('Y-m-d', time())])->limit(7);
+
+        return $summaries->getData();
     }
 }

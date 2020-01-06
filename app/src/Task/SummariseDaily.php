@@ -56,27 +56,66 @@ class SummariseDaily extends BuildTask
                 foreach ($list as $item) {
                     $item->delete();
                 }
+            } elseif ($args[0] == 'full') {
+                if ( Order::get()->count() > 0) {
+                    $first_day  =   Order::get()->sort(['Created' => 'ASC'])->limit(1)->first()->Created;
+                    $last_day   =   Order::get()->sort(['Created' => 'DESC'])->limit(1)->first()->Created;
+
+                    $first_date =   date('Y-m-d', strtotime($first_day));
+                    $last_date  =   date('Y-m-d', strtotime($last_day));
+
+                    $dates      =   [];
+                    $dates[]    =   $first_date;
+
+                    if ($first_date != $last_date) {
+                        $next_date  =   strtotime($first_date . "+1 days");
+
+                        while ($next_date < strtotime($last_date)) {
+                            $next_date  =   date('Y-m-d', $next_date);
+                            $dates[]    =   $next_date;
+                            $next_date  =   strtotime($next_date . "+1 days");
+                        }
+
+                        if($next_date < $last_day) {
+                            $dates[]    =   $last_date;
+                        }
+                    }
+
+                    foreach ($dates as $date) {
+                        print 'Generating: ' . $date . PHP_EOL;
+                        $this->generate_summary($date);
+                    }
+
+                    return true;
+                }
+
+                print 'Nothing to generate';
+                print PHP_EOL;
+                return false;
             }
         }
 
         if ( Order::get()->count() > 0) {
-            $first_day  =   Order::get()->sort(['Created' => 'ASC'])->limit(1)->first()->Created;
-            $last_day   =   Order::get()->sort(['Created' => 'DESC'])->limit(1)->first()->Created;
+            $first_day  =   Order::get()->sort(['Created' => 'DESC'])->limit(1)->first()->Created;
 
             $first_date =   date('Y-m-d', strtotime($first_day));
-            $last_date  =   date('Y-m-d', strtotime($last_day));
+            $last_date  =   date('Y-m-d', time());
 
             $dates      =   [];
             $dates[]    =   $first_date;
 
-            $next_date  =   strtotime($first_date . "+1 days");
-            while ($next_date < strtotime($last_date)) {
-                $next_date  =   date('Y-m-d', $next_date);
-                $dates[]    =   $next_date;
-                $next_date  =   strtotime($next_date . "+1 days");
-            }
+            if ($first_date != $last_date) {
+                $next_date  =   strtotime($first_date . "+1 days");
+                while ($next_date < strtotime($last_date)) {
+                    $next_date  =   date('Y-m-d', $next_date);
+                    $dates[]    =   $next_date;
+                    $next_date  =   strtotime($next_date . "+1 days");
+                }
 
-            $dates[]    =   $last_date;
+                if ($next_date < $last_date) {
+                    $dates[]    =   $last_date;
+                }
+            }
 
             foreach ($dates as $date) {
                 print 'Generating: ' . $date . PHP_EOL;
@@ -89,6 +128,7 @@ class SummariseDaily extends BuildTask
         print 'Nothing to generate';
         print PHP_EOL;
         return false;
+
     }
 
     private function generate_summary($date)
