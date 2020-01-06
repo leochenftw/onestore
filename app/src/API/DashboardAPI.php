@@ -107,7 +107,7 @@ class DashboardAPI extends RestfulController
 
     private function get_summaries()
     {
-        $summaries  =   EndDaySummary::get()->filter(['Date:LessThan' => date('Y-m-d', time())])->limit(7);
+        $summaries  =   EndDaySummary::get()->filter(['Date:LessThan' => date('Y-m-d', time())])->sort(['Created' => 'ASC'])->limit(7);
 
         return $summaries->getData();
     }
