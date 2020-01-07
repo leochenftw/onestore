@@ -26,6 +26,7 @@ class DashboardAPI extends RestfulController
     public function get($request)
     {
         if ($action = $request->param('Action')) {
+            $action =   'get_' . $action;
             if ($this->hasMethod($action)) {
                 return $this->$action();
             }

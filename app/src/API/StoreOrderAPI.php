@@ -12,6 +12,7 @@ use App\Web\Model\UseOfCoupon;
 use Leochenftw\eCommerce\eCollector\Model\Discount;
 use App\Web\Layout\ProductPage;
 use App\Web\Model\EndDaySummary;
+use Leochenftw\SocketEmitter;
 
 class StoreOrderAPI extends RestfulController
 {
@@ -119,6 +120,8 @@ class StoreOrderAPI extends RestfulController
         EndDaySummary::cumulate($order->TotalAmount, $order->PaidBy, date('Y-m-d', strtotime($order->Created)));
 
         $receipt    =   $order->getData();
+
+        SocketEmitter::emit('new_order');
 
         return $receipt['order'];
     }

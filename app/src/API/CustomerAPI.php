@@ -5,6 +5,7 @@ use Leochenftw\Restful\RestfulController;
 use Leochenftw\Debugger;
 use Leochenftw\eCommerce\eCollector\Model\Customer;
 use Leochenftw\Util;
+use Leochenftw\SocketEmitter;
 
 class CustomerAPI extends RestfulController
 {
@@ -102,6 +103,8 @@ class CustomerAPI extends RestfulController
             $customer->Wechat       =   $wechat;
 
             $customer->write();
+
+            SocketEmitter::emit('new_member');
 
             return [
                 'message'   =>  'Customer created'

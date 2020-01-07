@@ -7,6 +7,7 @@ use App\Web\Layout\ProductPage;
 use App\Web\Extension\TitleAliasExtension;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ScaffoldingProvider;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
+use Leochenftw\SocketEmitter;
 
 /**
  * Description
@@ -72,7 +73,6 @@ class Supplier extends DataObject implements ScaffoldingProvider
     {
         return $this->Products()->count();
     }
-
 
     public function provideGraphQLScaffolding(SchemaScaffolder $scaffolder)
     {

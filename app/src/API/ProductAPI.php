@@ -10,6 +10,7 @@ use App\Web\Model\Manufacturer;
 use App\Web\Model\Supplier;
 use App\Web\Layout\ProductLandingPage;
 use Leochenftw\Util;
+use Leochenftw\SocketEmitter;
 
 class ProductAPI extends RestfulController
 {
@@ -151,7 +152,7 @@ class ProductAPI extends RestfulController
 
         $product->writeToStage('Stage');
 
-        if ($product->isPublished()) {
+        if ($product->isPublished() || empty($id)) {
             $product->writeToStage('Live');
         }
 
@@ -170,13 +171,22 @@ class ProductAPI extends RestfulController
             foreach ($arr as $name) {
                 $name       =   trim($name);
                 $supplier   =   Supplier::get()->filter(['Title' => $name])->first();
+
                 if (empty($supplier)) {
                     $supplier   =   Supplier::create();
                     $supplier->Title    =   $name;
                     $supplier->write();
                 }
+
                 $product->Supplier()->add($supplier->ID);
+                SocketEmitter::emit('new_supplier');
             }
+        }
+
+        if (empty($id)) {
+            SocketEmitter::emit('product_change', [
+                'id'    =>  $product->ID
+            ]);
         }
 
         return [
@@ -203,6 +213,9 @@ class ProductAPI extends RestfulController
         $id =   $request->param('ID');
         if ($product = Versioned::get_by_stage(ProductPage::class, 'Stage')->byID($id)) {
             $product->doUnpublish();
+            SocketEmitter::emit('product_change', [
+                'id'    =>  $product->ID
+            ]);
             return [
                 'message'   =>  'Product ceased'
             ];
@@ -216,6 +229,9 @@ class ProductAPI extends RestfulController
         $id =   $request->param('ID');
         if ($product = Versioned::get_by_stage(ProductPage::class, 'Stage')->byID($id)) {
             $product->publishSingle();
+            SocketEmitter::emit('product_change', [
+                'id'    =>  $product->ID
+            ]);
             return [
                 'message'   =>  'Product published'
             ];
