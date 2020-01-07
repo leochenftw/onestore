@@ -166,7 +166,7 @@ class ProductAPI extends RestfulController
 
         $product->Supplier()->removeAll();
 
-        if ($supplier_names = $request->postVar('supplier')) {
+        if ($supplier_names = Util::null_it($request->postVar('supplier'))) {
             $arr    =   explode(',', $supplier_names);
             foreach ($arr as $name) {
                 $name       =   trim($name);
