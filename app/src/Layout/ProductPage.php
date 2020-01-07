@@ -93,6 +93,19 @@ class ProductPage extends Product
         ];
     }
 
+    public function getListData()
+    {
+        return [
+            'id'            =>  $this->ID,
+            'title'         =>  $this->Title,
+            'price'         =>  $this->Price,
+            'discountable'  =>  !$this->NoDiscount,
+            'no_point'      =>  $this->ContributeNoPoint,
+            'stock'         =>  $this->StockCount,
+            'low_stock'     =>  $this->StockLowWarningPoint
+        ];
+    }
+
     private static $indexes = [
         'Alias'     =>  true,
         'Barcode'   =>  [

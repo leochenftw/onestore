@@ -12,6 +12,7 @@ use App\Web\Model\UseOfCoupon;
 use App\Web\Model\Supplier;
 use SilverStripe\Versioned\Versioned;
 use App\Web\Model\EndDaySummary;
+use App\Web\Model\Expiry;
 
 class DashboardAPI extends RestfulController
 {
@@ -37,7 +38,12 @@ class DashboardAPI extends RestfulController
             'products'      =>  $this->get_num_products(),
             'suppliers'     =>  $this->get_num_active_suppliers(),
             'members'       =>  $this->get_num_customers(),
-            'summaries'     =>  $this->get_summaries()
+            'summaries'     =>  $this->get_summaries(),
+            'expiries'      =>  [
+                'expired'   =>  $this->get_expired_list(),
+                'expiring'  =>  $this->get_expiring_list()
+            ],
+            'low_stocks'    =>  $this->get_stock_lows()
         ];
     }
 
@@ -111,5 +117,23 @@ class DashboardAPI extends RestfulController
         $summaries  =   EndDaySummary::get()->filter(['Date:LessThan' => date('Y-m-d', time())])->limit(7);
 
         return $summaries->getData();
+    }
+
+    private function get_expiring_list()
+    {
+        return Expiry::get()->filter(['ExpiryDate:LessThanOrEqual' => strtotime('+30 days'), 'ExpiryDate:GreaterThanOrEqual' => date('Y-m-d', time())])->getListData();
+    }
+
+    private function get_expired_list()
+    {
+        return Expiry::get()->filter(['ExpiryDate:LessThanOrEqual' => date('Y-m-d', time())])->getListData();
+    }
+
+    private function get_stock_lows()
+    {
+        $raw    =   ProductPage::get()->filter(['StockLowWarningPoint:GreaterThan' => 0]);
+        $list   =   $raw->where('StockCount < StockLowWarningPoint');
+
+        return $list->getListData();
     }
 }

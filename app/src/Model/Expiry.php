@@ -42,7 +42,7 @@ class Expiry extends DataObject
      * @var array
      */
     private static $belongs_many_many = [
-        'Products'  =>  Product::class
+        'Products'  =>  ProductPage::class
     ];
 
     public function getData()
@@ -51,5 +51,29 @@ class Expiry extends DataObject
             'id'    =>  $this->ID,
             'date'  =>  $this->ExpiryDate
         ];
+    }
+
+    public function getListData()
+    {
+        return [
+            'id'        =>  $this->ID,
+            'date'      =>  $this->ExpiryDate,
+            'products'  =>  $this->get_product_list()
+        ];
+    }
+
+    private function get_product_list()
+    {
+        $dict   =   $this->Products()->map()->toArray();
+        $list   =   [];
+
+        foreach ($dict as $key => $value) {
+            $list[] =   [
+                'id'    =>  $key,
+                'title' =>  $value
+            ];
+        }
+
+        return $list;
     }
 }
