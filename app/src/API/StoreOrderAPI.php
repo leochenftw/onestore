@@ -121,7 +121,10 @@ class StoreOrderAPI extends RestfulController
 
         $receipt    =   $order->getData();
 
-        SocketEmitter::emit('new_order');
+        SocketEmitter::emit('new_order', !empty($customer) ? [
+            'id'        =>  $customer->ID,
+            'points'    =>  $customer->ShopPoints
+        ] : []);
 
         return $receipt['order'];
     }

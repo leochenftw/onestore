@@ -3,6 +3,7 @@
 namespace App\Web\Extension;
 use SilverStripe\ORM\DataExtension;
 use App\Web\Model\UseOfCoupon;
+use Leochenftw\SocketEmitter;
 
 class CustomerExension extends DataExtension
 {
@@ -58,5 +59,14 @@ class CustomerExension extends DataExtension
         }
 
         return $this->owner->Email;
+    }
+
+    /**
+     * Event handler called after deleting from the database.
+     */
+    public function onAfterDelete()
+    {
+        parent::onAfterDelete();
+        SocketEmitter::emit('new_member');
     }
 }
