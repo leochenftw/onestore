@@ -133,12 +133,7 @@ class OrderExtension extends DataExtension
             $amount -=  $this->owner->DiscountEntry()->DiscountRate;
             $amount =   $amount < 0 ? 0 : $amount;
             $points -=  $this->owner->DiscountEntry()->DiscountRate;
-        }
-
-        if ($this->owner->DiscountEntry()->exists() && $this->owner->DiscountEntry()->isVoucher) {
-            $points =   0;
-        } elseif ($points < 0) {
-            $points =   0;
+            $points =   $points < 0 ? 0 : $points;
         }
 
         $points +=  $nondispoints;

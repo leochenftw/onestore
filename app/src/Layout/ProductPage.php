@@ -194,6 +194,10 @@ class ProductPage extends Product
     public function onAfterWrite()
     {
         parent::onAfterWrite();
-        SocketEmitter::emit('stock_change');
+        SocketEmitter::emit('stock_change', [
+            'id'        =>  $this->ID,
+            'stock'     =>  $this->StockCount,
+            'low_stock' =>  $this->StockLowWarningPoint
+        ]);
     }
 }
