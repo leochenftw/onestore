@@ -40,6 +40,7 @@ class SummariseDaily extends BuildTask
      */
     public function run($request)
     {
+        $date   =   null;
         if (!empty($request->getVar('args'))) {
             $args   =   $request->getVar('args');
             if ($args[0] == 'remote') {
@@ -92,6 +93,11 @@ class SummariseDaily extends BuildTask
                 print 'Nothing to generate';
                 print PHP_EOL;
                 return false;
+            } else {
+                $date   =   $args[0];
+                print 'Generating/Updating: ' . $date;
+                print PHP_EOL;
+                return $this->generate_summary($date);
             }
         }
 
