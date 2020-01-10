@@ -28,6 +28,11 @@ class StoreOrderAPI extends RestfulController
     {
         if (($list = $request->postVar('list')) && ($by = $request->postVar('by'))) {
             $list       =   json_decode($list);
+            
+            if (empty($list)) {
+                return $this->httpError(400, 'The cart is empty!');
+            }
+
             $cash_taken =   !empty($request->postVar('cash_taken')) ? $request->postVar('cash_taken') : null;
             $customer   =   null;
             $coupon     =   null;

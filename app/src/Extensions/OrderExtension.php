@@ -121,8 +121,8 @@ class OrderExtension extends DataExtension
             $subpoints  =   $item->PointsWorth;
 
             if ($item->Product()->exists() && !$item->Product()->NoDiscount) {
-                $amount +=  ($subtotal * $factor * ($item->isRefunded ? -1 : 1));
-                $points +=  $subpoints * $factor;
+                $amount     +=  ($subtotal * $factor * ($item->isRefunded ? -1 : 1));
+                $points     +=  $subpoints * $factor;
             } else {
                 $nondiscountable    +=  $subtotal * ($item->isRefunded ? -1 : 1);
                 $nondispoints       +=  $subpoints;
@@ -136,10 +136,8 @@ class OrderExtension extends DataExtension
             $points =   $points < 0 ? 0 : $points;
         }
 
-        $points +=  $nondispoints;
-
-        $this->owner->TotalAmount   =   $amount + $nondiscountable;
-        $this->owner->PointsWorth   =   $points;
+        $this->owner->TotalAmount       =   $amount + $nondiscountable;
+        $this->owner->PointsWorth       =   $points + $nondispoints;
         $this->owner->write();
     }
 
@@ -148,7 +146,7 @@ class OrderExtension extends DataExtension
         $customer   =   $this->owner->Customer()->exists() ? $this->owner->Customer()->getData() : null;
 
         if (!empty($customer)) {
-            $customer['shop_points']    =   number_format($this->owner->PointBalanceSnapshot, 0);
+            $customer['shop_points']    =   number_format(floor($this->owner->PointBalanceSnapshot), 0);
         }
 
         return [
@@ -187,6 +185,9 @@ class OrderExtension extends DataExtension
         $data   =   [];
         foreach ($this->owner->Items() as $item) {
             if ($item_data = $item->getData()) {
+                $item_data['order_item_id'] =   $item_data['id'];
+                $item_data['id']            =   $item_data['prod_id'];
+
                 $data[] =   $item_data;
             }
         }

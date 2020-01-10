@@ -22,3 +22,4 @@ SilverStripe\Control\Director:
     'api/v/1/member/$ID/$Action' : 'Leochenftw\API\MemberAPI'
     'api/v/1/customer/$ID/$Action' : 'Leochenftw\API\CustomerAPI'
     'api/v/1/ranking' : 'Leochenftw\API\RankingAPI'
+    'api/v/1/refund/$receipt!' : 'Leochenftw\API\RefundAPI'
