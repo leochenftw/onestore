@@ -13,7 +13,6 @@ use App\Web\Model\Manufacturer;
 use App\Web\Model\Supplier;
 use App\Web\Model\Expiry;
 use Leochenftw\Grid;
-use Leochenftw\SocketEmitter;
 
 /**
  * Description
@@ -186,18 +185,5 @@ class ProductPage extends Product
         }
 
         return $fields;
-    }
-
-    /**
-     * Event handler called after writing to the database.
-     */
-    public function onAfterWrite()
-    {
-        parent::onAfterWrite();
-        SocketEmitter::emit('stock_change', [
-            'id'        =>  $this->ID,
-            'stock'     =>  $this->StockCount,
-            'low_stock' =>  $this->StockLowWarningPoint
-        ]);
     }
 }
