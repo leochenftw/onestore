@@ -29,7 +29,7 @@ class RankingAPI extends RestfulController
         $end        =   $request->getVar('end');
 
         $filters    =   [];
-        $orderitems =   OrderItem::get();
+        $orderitems =   OrderItem::get()->filter(['isRefunded' => false]);
 
         if ($term = $request->getVar('term')) {
             if ($type == 'barcode') {
