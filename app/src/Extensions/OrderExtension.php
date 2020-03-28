@@ -12,7 +12,7 @@ class OrderExtension extends DataExtension
 {
     private static $db = [
         'isStoreOrder'          =>  'Boolean',
-        'PaidBy'                =>  'Enum("Cash,EFTPOS,Voucher")',
+        'PaidBy'                =>  'Enum("Cash,EFTPOS,Voucher,Web Order")',
         'ReceiptNumber'         =>  'Varchar(36)',
         'CashTaken'             =>  'Currency',
         'ItemCount'             =>  'Int',
