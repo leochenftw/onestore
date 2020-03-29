@@ -96,6 +96,7 @@ class DashboardAPI extends RestfulController
             'total'     =>  $orders->sum('TotalAmount'),
             'eftpos'    =>  $orders->filter(['PaidBy' => 'EFTPOS'])->sum('TotalAmount'),
             'cash'      =>  $orders->filter(['PaidBy' => 'Cash'])->sum('TotalAmount'),
+            'web'       =>  $orders->filter(['PaidBy' => 'Web Order'])->sum('TotalAmount'),
             'voucher'   =>  $this->get_voucher_total($filter)
         ];
     }

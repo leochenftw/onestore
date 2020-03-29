@@ -2,7 +2,6 @@
 
 namespace App\Web\Extension;
 
-
 use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
