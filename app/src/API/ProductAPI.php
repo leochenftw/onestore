@@ -84,7 +84,7 @@ class ProductAPI extends RestfulController
     private function get_list(&$products)
     {
         if ($this->request->getVar('full')) {
-            return $product->getData(true);
+            return $products->getData(true);
         }
 
         $data   =   [];
