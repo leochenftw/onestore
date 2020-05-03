@@ -51,7 +51,7 @@ class ProductAPI extends RestfulController
                 return $this->httpError(404, 'No such supplier');
             }
         } else {
-            $products   =   ProductPage::get();
+            $products   =   $request->getVar('full') ? Versioned::get_by_stage(ProductPage::class, 'Stage') : ProductPage::get();
         }
 
         $count      =   $products->count();
@@ -83,6 +83,10 @@ class ProductAPI extends RestfulController
 
     private function get_list(&$products)
     {
+        if ($this->request->getVar('full')) {
+            return $product->getData(true);
+        }
+
         $data   =   [];
         foreach ($products as $product) {
             $data[] =   [
