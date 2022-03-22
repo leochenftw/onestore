@@ -1,0 +1,13 @@
+---
+Name: aws-sdk-config
+After: onestop
+---
+SilverStripe\Core\Injector\Injector:
+  App\Web\Task\Dynamo:
+    properties:
+      SDKConfig:
+        region: '`AWS_REGION`'
+        version: latest
+        credentials:
+          key: '`AWS_ACCESS_KEY_ID`'
+          secret: '`AWS_SECRET_ACCESS_KEY`'

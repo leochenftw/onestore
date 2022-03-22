@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Web\Extension;
+
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Security\Member;
@@ -17,7 +18,8 @@ class OrderExtension extends DataExtension
         'CashTaken'             =>  'Currency',
         'ItemCount'             =>  'Int',
         'PointBalanceSnapshot'  =>  'Int',
-        'PointsWorth'           =>  'Decimal'
+        'PointsWorth'           =>  'Decimal',
+        'Migrated'              =>  'Boolean',
     ];
 
     /**
@@ -193,5 +195,80 @@ class OrderExtension extends DataExtension
         }
 
         return $data;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            'ID' => $this->owner->MerchantReference,
+            'CustomerID' => $this->owner->CustomerID,
+            'LegacyID' => $this->owner->ID,
+            'Created' => $this->owner->Created,
+            'Status' => $this->owner->Status,
+            'AnonymousCustomer' => $this->owner->AnonymousCustomer,
+            'TotalAmount' => $this->owner->TotalAmount,
+            'TotalWeight' => $this->owner->TotalWeight,
+            'PayableTotal' => $this->owner->PayableTotal,
+            'Email' => $this->owner->Email,
+            'Phone' => $this->owner->Phone,
+            'ShippingFirstname' => $this->owner->ShippingFirstname,
+            'ShippingSurname' => $this->owner->ShippingSurname,
+            'ShippingAddress' => $this->owner->ShippingAddress,
+            'ShippingOrganisation' => $this->owner->ShippingOrganisation,
+            'ShippingApartment' => $this->owner->ShippingApartment,
+            'ShippingSuburb' => $this->owner->ShippingSuburb,
+            'ShippingTown' => $this->owner->ShippingTown,
+            'ShippingRegion' => $this->owner->ShippingRegion,
+            'ShippingCountry' => $this->owner->ShippingCountry,
+            'ShippingPostcode' => $this->owner->ShippingPostcode,
+            'ShippingPhone' => $this->owner->ShippingPhone,
+            'SameBilling' => $this->owner->SameBilling,
+            'BillingFirstname' => $this->owner->BillingFirstname,
+            'BillingSurname' => $this->owner->BillingSurname,
+            'BillingAddress' => $this->owner->BillingAddress,
+            'BillingOrganisation' => $this->owner->BillingOrganisation,
+            'BillingApartment' => $this->owner->BillingApartment,
+            'BillingSuburb' => $this->owner->BillingSuburb,
+            'BillingTown' => $this->owner->BillingTown,
+            'BillingRegion' => $this->owner->BillingRegion,
+            'BillingCountry' => $this->owner->BillingCountry,
+            'BillingPostcode' => $this->owner->BillingPostcode,
+            'BillingPhone' => $this->owner->BillingPhone,
+            'Comment' => $this->owner->Comment,
+            'TrackingNumber' => $this->owner->TrackingNumber,
+            'PaidBy' => $this->owner->PaidBy,
+            'ReceiptNumber' => $this->owner->ReceiptNumber,
+            'CashTaken' => $this->owner->CashTaken,
+            'ItemCount' => $this->owner->ItemCount,
+            'PointBalanceSnapshot' => $this->owner->PointBalanceSnapshot,
+            'PointsWorth' => $this->owner->PointsWorth,
+            'OrderItems' => array_map(fn ($item) => [
+                'ProductID' => $item->ProductID,
+                'Quantity' => $item->Quantity,
+                'Subtotal' => $item->Subtotal,
+                'Subweight' => $item->Subweight,
+                'isRefunded' => $item->isRefunded,
+                'PayableTotal' => $item->PayableTotal,
+                'UnitPrice' => round($item->Subtotal * 100 / $item->Quantity) * 0.01,
+                'CustomUnitPrice' => $item->CustomUnitPrice,
+                'isRefunded' => $item->isRefunded,
+                'PointsWorth' => $item->PointsWorth,
+            ], $this->owner->Items()->toArray()),
+            'OrderPayments' => array_map(fn ($payment) => [
+                'PaymentMethod' => $payment->PaymentMethod,
+                'CardType' => $payment->CardType,
+                'CardNumber' => $payment->CardNumber,
+                'PayerAccountNumber' => $payment->PayerAccountNumber,
+                'PayerAccountSortCode' => $payment->PayerAccountSortCode,
+                'PayerBankName' => $payment->PayerBankName,
+                'CardHolder' => $payment->CardHolder,
+                'Expiry' => $payment->Expiry,
+                'TransacID' => $payment->TransacID,
+                'Status' => $payment->Status,
+                'Amount' => $payment->Amount,
+                'Message' => $payment->Message,
+                'IP' => $payment->IP,
+            ], $this->owner->Payments()->toArray()),
+        ];
     }
 }
