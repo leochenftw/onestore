@@ -1,0 +1,10 @@
+---
+Name: awsconfigs
+After:
+  - '#dynamodb-migrator'
+---
+Leochenftw\Task\Migrate:
+  dynamodb_table: 'OneStop'
+
+  classes_to_migrate:
+    - App\Web\Model\Coupon

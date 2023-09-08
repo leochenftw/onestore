@@ -92,4 +92,13 @@ class Coupon extends DataObject
             'created'   =>  strtotime($this->Created)
         ];
     }
+
+    public function getDynamoDbMapping()
+    {
+        return [
+            'Class' => 'Coupon',
+            'ID' => "Coupon-{$this->ID}",
+            'Title' => $this->Title,
+        ];
+    }
 }
